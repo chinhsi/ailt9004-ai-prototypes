@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speaking Pal</title>
+<style>
+  :root { --ink:#1f2a24; --cream:#faf6ee; --green:#3E724F; --muted:#6b7570; --card:#ffffff; --line:#e2dccd; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans", "PingFang HK", "Microsoft JhengHei", sans-serif; background:var(--cream); color:var(--ink); }
+  header { background:var(--green); color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+  header h1 { font-size:20px; margin:0; font-weight:600; }
+  header button { background:#fff; color:var(--green); border:0; border-radius:6px; padding:6px 12px; cursor:pointer; font-weight:600; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  #settings { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+  #settings.hidden { display:none; }
+  .row { display:grid; grid-template-columns: 150px 1fr; gap:8px 12px; align-items:center; margin-bottom:8px; }
+  .row label { font-size:14px; color:var(--muted); }
+  .row input, .row select { width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:6px; font-size:14px; }
+  .hint { font-size:12px; color:var(--muted); margin:4px 0 0; }
+  #chat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; min-height:320px; max-height:55vh; overflow-y:auto; }
+  .msg { max-width:85%; margin:8px 0; padding:10px 14px; border-radius:14px; line-height:1.45; white-space:pre-wrap; }
+  .user { margin-left:auto; background:#e5efe8; border-bottom-right-radius:4px; }
+  .pal  { margin-right:auto; background:#f4f1e8; border-bottom-left-radius:4px; }
+  .tip  { font-size:13px; color:var(--green); margin-top:6px; border-top:1px dashed var(--line); padding-top:6px; }
+  .sys  { text-align:center; color:var(--muted); font-size:13px; margin:8px 0; }
+  #controls { display:flex; gap:8px; margin-top:12px; align-items:center; }
+  #text { flex:1; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:15px; }
+  button.act { background:var(--green); color:#fff; border:0; border-radius:8px; padding:10px 14px; font-size:15px; cursor:pointer; }
+  button.act:disabled { opacity:.5; cursor:default; }
+  #mic.listening { background:#b3402f; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(179,64,47,.5)} 100%{box-shadow:0 0 0 12px rgba(179,64,47,0)} }
+  .bar { display:flex; gap:14px; align-items:center; font-size:13px; color:var(--muted); margin-top:8px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Speaking Pal</h1>
+  <button id="toggleSettings">Settings</button>
+</header>
+<main>
+  <section id="settings">
+    <div class="row"><label>AI provider</label>
+      <select id="provider">
+        <option value="https://openrouter.ai/api/v1|inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">OpenRouter (free models, works in Hong Kong)</option>
+        <option value="custom|">Custom OpenAI-compatible endpoint</option>
+      </select></div>
+    <div class="row"><label>API key</label><input id="apiKey" type="password" placeholder="paste your key from openrouter.ai/keys"></div>
+    <div class="row"><label>Base URL</label><input id="baseUrl" value="https://openrouter.ai/api/v1"></div>
+    <div class="row"><label>Practice language</label>
+      <select id="lang">
+        <option value="en-US">English</option>
+        <option value="zh-CN">Putonghua (普通話)</option>
+        <option value="yue-Hant-HK">Cantonese (廣東話)</option>
+      </select></div>
+    <div class="row"><label>Learner level</label>
+      <select id="level">
+        <option>Beginner (Primary 4–6)</option>
+        <option selected>Intermediate (Secondary 1–3)</option>
+        <option>Advanced (Secondary 4–6)</option>
+      </select></div>
+    <div class="row"><label>Voice</label><select id="voice"><option value="">(auto — best available)</option></select></div>
+    <div class="row"><label>Scenario</label><input id="scenario" value="Ordering lunch at a cha chaan teng (茶餐廳)"></div>
+    <div class="row"><label>Model(s)</label><input id="model" value="inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"></div>
+    <p class="hint">Your key is stored only in this browser (localStorage). Never share the file with your key inside it. Voice input needs Chrome or Edge. Best Cantonese voices: Microsoft Edge ("… Online (Natural)" voices) or a "Google" voice in Chrome; Mac users can also install a Premium voice in System Settings → Accessibility → Spoken Content. Models: a comma-separated list; if the first is busy or rate-limited the next is tried.</p>
+    <p style="margin:10px 0 0"><button class="act" id="start">Start conversation</button></p>
+  </section>
+
+  <section id="chat"><div class="sys">Fill in the settings and press "Start conversation".</div></section>
+
+  <div id="controls">
+    <button class="act" id="mic" title="Click to talk, click again to stop" disabled>🎤 Talk</button>
+    <input id="text" placeholder="…or type here and press Enter" disabled>
+    <button class="act" id="send" disabled>Send</button>
+  </div>
+  <div class="bar">
+    <label><input type="checkbox" id="speak" checked> Read replies aloud</label>
+    <label><input type="checkbox" id="showTips" checked> Show language tips</label>
+    <span id="status"></span>
+  </div>
+</main>
+
+<script>
+// ---------- state ----------
+const $ = id => document.getElementById(id);
+let history = [];      // OpenAI-style messages: [{role:'user'|'assistant', content}]
+let systemPrompt = '';
+let recognizing = false, recognition = null;
+
+// ---------- settings persistence ----------
+try { if (localStorage.getItem('sp_lang') === 'zh-HK') localStorage.setItem('sp_lang', 'yue-Hant-HK'); } catch (e) {}
+['provider','apiKey','baseUrl','lang','level','scenario','model'].forEach(id => {
+  try { const v = localStorage.getItem('sp_' + id); if (v) $(id).value = v; } catch (e) {}
+  $(id).addEventListener('change', () => { try { localStorage.setItem('sp_' + id, $(id).value); } catch (e) {} });
+});
+$('toggleSettings').onclick = () => $('settings').classList.toggle('hidden');
+$('provider').addEventListener('change', () => {
+  const [base, models] = $('provider').value.split('|');
+  if (base !== 'custom') { $('baseUrl').value = base; $('model').value = models; }
+  try { localStorage.setItem('sp_baseUrl', $('baseUrl').value); localStorage.setItem('sp_model', $('model').value); } catch (e) {}
+});
+
+// ---------- UI helpers ----------
+function addMsg(role, text, tip) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.textContent = text;
+  if (tip && $('showTips').checked) {
+    const t = document.createElement('div'); t.className = 'tip'; t.textContent = 'Tip: ' + tip; d.appendChild(t);
+  }
+  $('chat').appendChild(d); $('chat').scrollTop = $('chat').scrollHeight;
+}
+function sys(text) { const d = document.createElement('div'); d.className = 'sys'; d.textContent = text; $('chat').appendChild(d); $('chat').scrollTop = $('chat').scrollHeight; }
+function setBusy(b) { $('send').disabled = b; $('mic').disabled = b; $('text').disabled = b; $('status').textContent = b ? 'Thinking… (free models can take 5–10 s)' : ''; }
+
+// ---------- speech ----------
+function langName() { return { 'en-US': 'English', 'zh-CN': 'Putonghua (Mandarin Chinese, simplified characters)', 'yue-Hant-HK': 'Cantonese (traditional characters, natural spoken Hong Kong Cantonese)' }[$('lang').value]; }
+function ttsLang() { return $('lang').value === 'yue-Hant-HK' ? 'zh-HK' : $('lang').value; }   // TTS voices use zh-HK for Cantonese
+function voicesForLang() {
+  const want = ttsLang().toLowerCase();
+  return speechSynthesis.getVoices().filter(v => v.lang.replace('_', '-').toLowerCase() === want);
+}
+// Rank voices: online neural (Edge) > Google (Chrome) > Premium/Enhanced (macOS) > anything else
+function voiceScore(v) {
+  const n = v.name.toLowerCase();
+  if (n.includes('natural') || n.includes('online')) return 4;
+  if (n.includes('google')) return 3;
+  if (n.includes('premium') || n.includes('enhanced')) return 2;
+  return 1;
+}
+function fillVoices() {
+  const sel = $('voice'); const list = voicesForLang().sort((a, b) => voiceScore(b) - voiceScore(a));
+  let saved = ''; try { saved = localStorage.getItem('sp_voice_' + ttsLang()) || ''; } catch (e) {}
+  sel.innerHTML = '<option value="">(auto — best available)</option>' + list.map(v => `<option value="${v.name}"${v.name === saved ? ' selected' : ''}>${v.name}${v.localService ? '' : ' (online)'}</option>`).join('');
+  if (!list.length) sel.innerHTML += '<option value="" disabled>No voice installed for this language</option>';
+}
+function pickVoice() {
+  const list = voicesForLang(); if (!list.length) return null;
+  const chosen = $('voice').value; const v = list.find(v => v.name === chosen);
+  return v || list.sort((a, b) => voiceScore(b) - voiceScore(a))[0];
+}
+function speak(text) {
+  if (!$('speak').checked || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = ttsLang(); u.rate = 0.95; u.pitch = 1;
+  const v = pickVoice(); if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+if ('speechSynthesis' in window) { speechSynthesis.onvoiceschanged = fillVoices; fillVoices(); }
+$('lang').addEventListener('change', fillVoices);
+$('voice').addEventListener('change', () => { try { localStorage.setItem('sp_voice_' + ttsLang(), $('voice').value); } catch (e) {} });
+function setupRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { $('mic').disabled = true; $('mic').title = 'Voice input not supported in this browser — use Chrome or Edge'; sys('Voice input is not supported in this browser. Use Chrome or Edge, or type instead.'); return; }
+  recognition = new SR();
+  recognition.interimResults = true;     // show what it hears while you speak
+  recognition.maxAlternatives = 1;
+  recognition.continuous = false;
+  let finalText = '';
+  recognition.onstart = () => { finalText = ''; $('text').value = ''; $('text').placeholder = 'Listening… speak now'; };
+  recognition.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript; else interim += e.results[i][0].transcript;
+    }
+    $('text').value = finalText || interim;      // live transcript in the box
+  };
+  recognition.onerror = e => {
+    stopListening();
+    const why = { 'not-allowed': 'microphone permission was refused — allow the mic in the address bar and try again',
+                  'no-speech': 'no speech was detected — click Talk, wait for the red button, then speak',
+                  'audio-capture': 'no microphone found',
+                  'network': 'the speech service could not be reached (it needs an internet connection to Google\'s speech servers)',
+                  'language-not-supported': 'this language is not supported by your browser\'s speech engine' }[e.error] || e.error;
+    sys('Mic error: ' + why);
+  };
+  recognition.onend = () => {
+    stopListening();
+    $('text').placeholder = '…or type here and press Enter';
+    const heard = (finalText || $('text').value).trim();
+    if (heard) { sys('Heard: ' + heard); sendText(heard); }
+    else if (recognizing === false && !$('text').value) sys('Didn\'t catch that. Try again: click Talk, wait for the red button, say one sentence, then pause.');
+  };
+}
+function stopListening() { recognizing = false; $('mic').classList.remove('listening'); $('mic').textContent = '🎤 Talk'; }
+$('mic').onclick = () => {
+  if (!recognition) setupRecognition();
+  if (!recognition) return;
+  if (recognizing) { recognition.stop(); return; }
+  speechSynthesis.cancel();
+  recognition.lang = $('lang').value;     // en-US · zh-CN · yue-Hant-HK (Google's code for Cantonese; zh-HK is treated as generic Chinese)
+  try { recognition.start(); recognizing = true; $('mic').classList.add('listening'); $('mic').textContent = '● Listening… (click to stop)'; }
+  catch (e) { sys('Could not start mic: ' + e.message); }
+};
+
+// ---------- AI call (OpenAI-compatible) ----------
+// Lenient JSON extraction: models sometimes wrap JSON in ``` fences or add a sentence.
+function parseReply(text) {
+  try { return JSON.parse(text); } catch (e) {}
+  const m = text.match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch (e) {} }
+  return { reply: text.trim(), tip: '' };
+}
+// Any OpenAI-compatible endpoint: POST {base}/chat/completions
+async function callAI(messages) {
+  const key = $('apiKey').value.trim();
+  if (!key) throw new Error('Please paste your API key in Settings.');
+  const base = $('baseUrl').value.trim().replace(/\/+$/, '');
+  const models = $('model').value.split(',').map(m => m.trim()).filter(Boolean);
+  let lastErr = null;
+  for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const body = { model, temperature: 0.8, messages: [{ role: 'system', content: systemPrompt }, ...messages] };
+      const r = await fetch(base + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key, 'X-Title': 'Speaking Pal (AILT9004)' },
+        body: JSON.stringify(body)
+      });
+      const data = await r.json().catch(() => ({}));
+      if (r.ok && data.choices && data.choices[0]) {
+        const c = data.choices[0].message.content;
+        return parseReply(Array.isArray(c) ? c.map(p => p.text || '').join('') : (c || ''));
+      }
+      lastErr = new Error((data.error && (data.error.message || data.error)) ? (data.error.message || JSON.stringify(data.error)) : 'HTTP ' + r.status);
+      if (![429, 502, 503, 404].includes(r.status)) throw lastErr;   // real error: stop
+      $('status').textContent = model + ' busy, retrying…';
+      await new Promise(res => setTimeout(res, 1500));
+    }
+  }
+  throw lastErr;
+}
+function buildSystemPrompt() {
+  return `You are "Pal", a friendly conversation partner helping a Hong Kong student practise speaking ${langName()}.
+Learner level: ${$('level').value}. Scenario: ${$('scenario').value}.
+Rules:
+- Stay in character inside the scenario and keep the conversation going: always end your reply with a question or a prompt that invites the learner to say more.
+- Speak ONLY in ${langName()}. Keep each reply to 1–3 short sentences suited to the learner's level. Use everyday vocabulary the learner can imitate.
+- Never lecture. If the learner makes a language mistake, do NOT correct it inside the reply; instead put ONE short, encouraging tip (max 25 words) in the "tip" field, quoting the better form. If there is nothing to correct, put a tiny praise or a useful phrase to try next in "tip".
+- If the learner writes in another language, gently answer in ${langName()} and model how to say it.
+- Output ONLY a JSON object, no code fences, no extra text: {"reply": "...", "tip": "..."}.`;
+}
+
+async function sendText(text) {
+  text = (text || '').trim(); if (!text) return;
+  addMsg('user', text);
+  $('text').value = '';
+  history.push({ role: 'user', content: text });
+  setBusy(true);
+  try {
+    const { reply, tip } = await callAI(history);
+    history.push({ role: 'assistant', content: JSON.stringify({ reply, tip }) });
+    addMsg('pal', reply, tip);
+    speak(reply);
+  } catch (e) { sys('Error: ' + e.message); history.pop(); }
+  setBusy(false);
+  $('text').focus();
+}
+
+$('start').onclick = async () => {
+  systemPrompt = buildSystemPrompt();
+  history = [];
+  $('chat').innerHTML = '';
+  $('settings').classList.add('hidden');
+  sys(`Scenario: ${$('scenario').value} · ${langName().split(' (')[0]} · ${$('level').value}`);
+  setBusy(true);
+  try {
+    const opener = { role: 'user', content: '(The learner has just arrived. Greet them in character and open the scenario with a simple question.)' };
+    const { reply, tip } = await callAI([opener]);
+    history.push(opener, { role: 'assistant', content: JSON.stringify({ reply, tip }) });
+    addMsg('pal', reply, '');
+    speak(reply);
+  } catch (e) { sys('Error: ' + e.message); $('settings').classList.remove('hidden'); }
+  setBusy(false);
+};
+$('send').onclick = () => sendText($('text').value);
+$('text').addEventListener('keydown', e => { if (e.key === 'Enter') sendText($('text').value); });
+</script>
+</body>
+</html>
