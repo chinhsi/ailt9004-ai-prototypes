@@ -103,6 +103,7 @@ const $ = id => document.getElementById(id);
 let history = [];      // OpenAI-style messages: [{role:'user'|'assistant', content}]
 let systemPrompt = '';
 let recognizing = false, recognition = null;
+const unpaid = new Set();   // models that returned 402 this session — skipped silently afterwards
 
 // ---------- settings persistence ----------
 try { if (localStorage.getItem('sp_lang') === 'zh-HK') localStorage.setItem('sp_lang', 'yue-Hant-HK'); } catch (e) {}
@@ -238,6 +239,7 @@ async function callAI(messages) {
   if (!models.length) throw new Error('No model set — choose a Model preset in Settings.');
   let lastErr = null;
   for (const model of models) {
+    if (unpaid.has(model)) continue;
     for (let attempt = 0; attempt < 2; attempt++) {
       const body = { model, temperature: 0.8, messages: [{ role: 'system', content: systemPrompt }, ...messages] };
       const r = await fetch(base + '/chat/completions', {
@@ -252,7 +254,8 @@ async function callAI(messages) {
       }
       lastErr = new Error((data.error && (data.error.message || data.error)) ? (data.error.message || JSON.stringify(data.error)) : 'HTTP ' + r.status);
       if (r.status === 402 || /credit|insufficient|payment/i.test(lastErr.message)) {   // premium model without credit: skip to the next model
-        sys('"' + model + '" needs credit on your OpenRouter account — skipping to the next model. (Add credit at openrouter.ai/credits, or choose the Free preset.)');
+        unpaid.add(model);
+        sys('"' + model + '" needs credit on your OpenRouter account — using the next model for the rest of this session. (Add credit at openrouter.ai/credits, or choose the Free preset.)');
         break;
       }
       if (![429, 502, 503, 404].includes(r.status)) throw lastErr;   // real error: stop
