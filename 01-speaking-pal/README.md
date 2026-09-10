@@ -29,7 +29,7 @@ Reload the page after saving.
 
 ## Known limits (good discussion material)
 
-- Speech recognition is done by the browser (Chrome/Edge send audio to Google's speech service; Safari has none). Cantonese (`yue-Hant-HK`, Google's code for spoken Cantonese; `zh-HK` gives worse results) is noticeably weaker than English: speak one clear sentence after the button turns red, then pause. The box shows what it heard, and the chat prints "Heard: …" so you can judge. Reflect: whose accents does it hear well? (Week 2, Case 3.)
+- Speech recognition is done by the browser (Chrome/Edge send audio to Google's speech service; Safari has none). Cantonese (`yue-Hant-HK`, Google's code for spoken Cantonese; `zh-HK` gives worse results) is noticeably weaker than English: speak after the button turns red; pauses are fine, it keeps listening until you click the button again or stay silent for 2.5 seconds. The box shows the running transcript, and the chat prints "Heard: …" so you can judge. Reflect: whose accents does it hear well? (Week 2, Case 3.)
 - If the mic never starts, check the address bar for a blocked-microphone icon and allow it; a page opened from a file (file://) asks every time.
 - Text-to-speech voices come from your browser/computer, and quality varies a lot. Settings → **Voice** lists what you have; the page auto-picks the best. Most natural Cantonese: **Microsoft Edge** ("HiuGaai/HiuMaan/WanLung Online (Natural)"), then a "Google 粤語" voice in Chrome. On a Mac the built-in *Sinji* voice sounds robotic — install its Premium version in System Settings → Accessibility → Spoken Content → System Voice → Manage Voices → 中文（香港）.
 - Free models may use your prompts for training. Do not put student names or personal details in the conversation.

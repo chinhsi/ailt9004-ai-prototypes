@@ -86,7 +86,7 @@
   <section id="chat"><div class="sys">Fill in the settings and press "Start conversation".</div></section>
 
   <div id="controls">
-    <button class="act" id="mic" title="Click to talk, click again to stop" disabled>🎤 Talk</button>
+    <button class="act" id="mic" title="Click to talk; click again (or pause 2.5 s) to send" disabled>🎤 Talk</button>
     <input id="text" placeholder="…or type here and press Enter" disabled>
     <button class="act" id="send" disabled>Send</button>
   </div>
@@ -184,15 +184,18 @@ function setupRecognition() {
   recognition = new SR();
   recognition.interimResults = true;     // show what it hears while you speak
   recognition.maxAlternatives = 1;
-  recognition.continuous = false;
-  let finalText = '';
-  recognition.onstart = () => { finalText = ''; $('text').value = ''; $('text').placeholder = 'Listening… speak now'; };
+  recognition.continuous = true;         // keep listening across pauses; we stop after 2.5 s of silence or when the button is clicked
+  let finalText = '', interimText = '', silenceTimer = null;
+  const SILENCE_MS = 2500;
+  recognition.onstart = () => { finalText = ''; interimText = ''; $('text').value = ''; $('text').placeholder = 'Listening… speak now (pauses are fine)'; };
   recognition.onresult = e => {
-    let interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) finalText += e.results[i][0].transcript; else interim += e.results[i][0].transcript;
+    finalText = ''; interimText = '';
+    for (let i = 0; i < e.results.length; i++) {          // rebuild from ALL results so nothing is lost
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript; else interimText += e.results[i][0].transcript;
     }
-    $('text').value = finalText || interim;      // live transcript in the box
+    $('text').value = (finalText + interimText).trim();   // live, cumulative transcript
+    clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => { try { recognition.stop(); } catch (err) {} }, SILENCE_MS);
   };
   recognition.onerror = e => {
     stopListening();
@@ -204,9 +207,10 @@ function setupRecognition() {
     sys('Mic error: ' + why);
   };
   recognition.onend = () => {
+    clearTimeout(silenceTimer);
     stopListening();
     $('text').placeholder = '…or type here and press Enter';
-    const heard = (finalText || $('text').value).trim();
+    const heard = (finalText + interimText).trim() || $('text').value.trim();
     if (heard) { sys('Heard: ' + heard); sendText(heard); }
     else if (recognizing === false && !$('text').value) sys('Didn\'t catch that. Try again: click Talk, wait for the red button, say one sentence, then pause.');
   };
@@ -218,7 +222,7 @@ $('mic').onclick = () => {
   if (recognizing) { recognition.stop(); return; }
   speechSynthesis.cancel();
   recognition.lang = $('lang').value;     // en-US · zh-CN · yue-Hant-HK (Google's code for Cantonese; zh-HK is treated as generic Chinese)
-  try { recognition.start(); recognizing = true; $('mic').classList.add('listening'); $('mic').textContent = '● Listening… (click to stop)'; }
+  try { recognition.start(); recognizing = true; $('mic').classList.add('listening'); $('mic').textContent = '● Listening… (click to send)'; }
   catch (e) { sys('Could not start mic: ' + e.message); }
 };
 
