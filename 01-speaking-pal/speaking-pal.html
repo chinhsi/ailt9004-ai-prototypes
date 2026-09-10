@@ -102,7 +102,7 @@
 const $ = id => document.getElementById(id);
 let history = [];      // OpenAI-style messages: [{role:'user'|'assistant', content}]
 let systemPrompt = '';
-let recognizing = false, recognition = null;
+let recognizing = false, recognition = null, discardResult = false;
 const unpaid = new Set();   // models that returned 402 this session — skipped silently afterwards
 
 // ---------- settings persistence ----------
@@ -210,6 +210,7 @@ function setupRecognition() {
     clearTimeout(silenceTimer);
     stopListening();
     $('text').placeholder = '…or type here and press Enter';
+    if (discardResult) { discardResult = false; finalText = ''; interimText = ''; return; }   // user already sent the text manually
     const heard = (finalText + interimText).trim() || $('text').value.trim();
     if (heard) { sys('Heard: ' + heard); sendText(heard); }
     else if (recognizing === false && !$('text').value) sys('Didn\'t catch that. Try again: click Talk, wait for the red button, say one sentence, then pause.');
@@ -288,6 +289,7 @@ Rules:
 
 async function sendText(text) {
   text = (text || '').trim(); if (!text) return;
+  if (recognizing && recognition) { discardResult = true; try { recognition.abort(); } catch (e) {} stopListening(); }   // manual send while listening: don't send twice
   addMsg('user', text);
   $('text').value = '';
   history.push({ role: 'user', content: text });
