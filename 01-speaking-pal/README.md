@@ -23,7 +23,7 @@ Open the file in any text editor (Notepad, TextEdit, VS Code) and change:
 - the level labels (`id="level"`),
 - the persona and correction rules in `buildSystemPrompt()` — e.g. "correct every mistake immediately" for an accuracy-focused version, or "you are a job interviewer" for a Secondary 6 mock interview,
 - `temperature` (0.8 = lively; 0.3 = predictable),
-- the model list in Settings — any `:free` model on OpenRouter, or switch Provider to *Custom* and point it at another OpenAI-compatible endpoint (a school server, a paid provider, a local model).
+- the **Model preset** in Settings: *Free* (default), *Premium* (Claude Haiku / Gemini Flash / DeepSeek via OpenRouter — noticeably better Cantonese; needs credit on your OpenRouter account, roughly HK$0.01 per turn; if there is no credit the page says so and drops back to the free models), or *Custom* — any OpenAI-compatible endpoint (a school server, a paid provider, a local model).
 
 Reload the page after saving.
 
