@@ -75,11 +75,11 @@
     <div class="row"><label>Model preset</label>
       <select id="modelPreset">
         <option value="inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">Free models (default — no credit needed)</option>
-        <option value="anthropic/claude-haiku-4.5, google/gemini-3.6-flash, deepseek/deepseek-v4-flash, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">Premium models (needs credit on your OpenRouter account; falls back to free)</option>
+        <option value="qwen/qwen3-max, moonshotai/kimi-k2.6, deepseek/deepseek-v4-flash, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">Premium models — Qwen / Kimi / DeepSeek (needs credit on your OpenRouter account; falls back to free)</option>
         <option value="">Custom (edit the list below)</option>
       </select></div>
     <div class="row"><label>Model(s)</label><input id="model" value="inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"></div>
-    <p class="hint">Your key is stored only in this browser (localStorage). Never share the file with your key inside it. Voice input needs Chrome or Edge. Best Cantonese voices: Microsoft Edge ("… Online (Natural)" voices) or a "Google" voice in Chrome; Mac users can also install a Premium voice in System Settings → Accessibility → Spoken Content. Models: a comma-separated list, tried in order; busy, rate-limited or unpaid models are skipped automatically. Premium models cost about HK$0.01 per conversation turn.</p>
+    <p class="hint">Your key is stored only in this browser (localStorage). Never share the file with your key inside it. Voice input needs Chrome or Edge. Best Cantonese voices: Microsoft Edge ("… Online (Natural)" voices) or a "Google" voice in Chrome; Mac users can also install a Premium voice in System Settings → Accessibility → Spoken Content. Models: a comma-separated list, tried in order; busy, rate-limited or unpaid models are skipped automatically. Premium models cost about HK$0.01–0.03 per conversation turn. Hong Kong-billed accounts cannot use OpenAI/Anthropic/Google models on OpenRouter; the Premium preset uses Qwen, Kimi and DeepSeek instead.</p>
     <p style="margin:10px 0 0"><button class="act" id="start">Start conversation</button></p>
   </section>
 
@@ -253,9 +253,15 @@ async function callAI(messages) {
         return parseReply(Array.isArray(c) ? c.map(p => p.text || '').join('') : (c || ''));
       }
       lastErr = new Error((data.error && (data.error.message || data.error)) ? (data.error.message || JSON.stringify(data.error)) : 'HTTP ' + r.status);
-      if (r.status === 402 || /credit|insufficient|payment/i.test(lastErr.message)) {   // premium model without credit: skip to the next model
+      const msg = lastErr.message;
+      if (r.status === 402 || /credit|insufficient|payment/i.test(msg)) {          // premium model without credit
         unpaid.add(model);
         sys('"' + model + '" needs credit on your OpenRouter account — using the next model for the rest of this session. (Add credit at openrouter.ai/credits, or choose the Free preset.)');
+        break;
+      }
+      if (r.status === 403 || /region|billing address|not have access|not available in/i.test(msg)) {   // model blocked for this account's region
+        unpaid.add(model);
+        sys('"' + model + '" is not available for your account\'s region — using the next model for the rest of this session. (Hong Kong accounts cannot use OpenAI, Anthropic or Google models on OpenRouter.)');
         break;
       }
       if (![429, 502, 503, 404].includes(r.status)) throw lastErr;   // real error: stop
