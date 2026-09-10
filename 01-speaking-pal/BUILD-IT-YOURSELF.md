@@ -9,7 +9,7 @@ Requirements:
 - Settings panel: API key (password field, saved in localStorage), base URL (default https://openrouter.ai/api/v1), practice language (English en-US, Putonghua zh-CN, Cantonese zh-HK), learner level (3 options), free-text scenario, model name (default "nvidia/nemotron-3-super-120b-a12b:free").
 - A "Talk" button using the browser's SpeechRecognition (webkitSpeechRecognition fallback) in the chosen language; also a text box for typing.
 - Send the conversation history to {baseUrl}/chat/completions (OpenAI-compatible, Bearer key) with a system message that keeps the AI in character, in the target language, 1–3 short sentences, always ending with a question.
-- Ask for a JSON object {"reply": string, "tip": string} and parse it leniently (strip code fences). The reply is the in-character message; the tip is ONE short encouraging language tip (or praise) shown in small text under the reply.
+- Ask for a JSON object {"reply": string, "tip": string} and parse it leniently (strip code fences). The reply is the in-character message; the tip is ONE short encouraging language tip (or praise) shown in small text under the reply. Tell the model the learner's words come from speech recognition, so it must ignore punctuation, capitalisation and likely mis-hearings and only comment on grammar, wording and naturalness.
 - Read replies aloud with speechSynthesis in the chosen language (checkbox to turn off).
 - If the API returns 429 or 503, wait 1.5 s and retry once, then try the next model in a comma-separated list.
 - Plain CSS, no external libraries, works from file://. Show errors in the chat area.
