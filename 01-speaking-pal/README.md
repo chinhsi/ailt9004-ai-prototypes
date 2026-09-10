@@ -10,7 +10,7 @@
 
 1. Get a free OpenRouter key: <https://openrouter.ai/keys> → sign in with Google or GitHub → **Create key** → copy it (free models: 50 requests a day, no card).
 2. Double-click `speaking-pal.html` to open it in **Chrome or Edge** (Safari has no speech recognition).
-3. Paste the key, pick a language/level/scenario, press **Start conversation**.
+3. Paste the key, pick a language and level, choose a scenario preset (cha chaan teng, directions at Central MTR, job interview, hotel check-in in London, clinic appointment, shop complaint…) or type your own, then press **Start conversation**.
 4. Press **Talk**, speak, and wait. Or type in the box if you have no microphone.
 
 The key is saved only inside your browser (localStorage). Do not upload the file anywhere with a key typed into it — the file itself never contains the key.
@@ -19,7 +19,7 @@ The key is saved only inside your browser (localStorage). Do not upload the file
 
 Open the file in any text editor (Notepad, TextEdit, VS Code) and change:
 
-- the scenario list or default (`id="scenario"`),
+- the scenario presets (`id="scenarioPreset"`) or the default (`id="scenario"`),
 - the level labels (`id="level"`),
 - the persona and correction rules in `buildSystemPrompt()` — e.g. "correct every mistake immediately" for an accuracy-focused version, or "you are a job interviewer" for a Secondary 6 mock interview,
 - `temperature` (0.8 = lively; 0.3 = predictable),

@@ -60,6 +60,17 @@
         <option>Advanced (Secondary 4–6)</option>
       </select></div>
     <div class="row"><label>Voice</label><select id="voice"><option value="">(auto — best available)</option></select></div>
+    <div class="row"><label>Scenario presets</label>
+      <select id="scenarioPreset">
+        <option value="">(pick one, or write your own below)</option>
+        <option>Ordering lunch at a cha chaan teng (茶餐廳)</option>
+        <option>A tourist asks you for directions at Central MTR station; you help them get to the Peak Tram</option>
+        <option>Job interview for a part-time job at a bookshop; Pal is the manager</option>
+        <option>First day at a new school: Pal is a classmate who wants to know about you</option>
+        <option>Checking in at a hotel in London; Pal is the receptionist and there is a problem with the booking</option>
+        <option>Calling a clinic to make an appointment; Pal is the receptionist asking about symptoms and times</option>
+        <option>Complaining politely in a shop about a phone that stopped working after two days</option>
+      </select></div>
     <div class="row"><label>Scenario</label><input id="scenario" value="Ordering lunch at a cha chaan teng (茶餐廳)"></div>
     <div class="row"><label>Model(s)</label><input id="model" value="inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"></div>
     <p class="hint">Your key is stored only in this browser (localStorage). Never share the file with your key inside it. Voice input needs Chrome or Edge. Best Cantonese voices: Microsoft Edge ("… Online (Natural)" voices) or a "Google" voice in Chrome; Mac users can also install a Premium voice in System Settings → Accessibility → Spoken Content. Models: a comma-separated list; if the first is busy or rate-limited the next is tried.</p>
@@ -94,6 +105,11 @@ try { if (localStorage.getItem('sp_lang') === 'zh-HK') localStorage.setItem('sp_
   $(id).addEventListener('change', () => { try { localStorage.setItem('sp_' + id, $(id).value); } catch (e) {} });
 });
 $('toggleSettings').onclick = () => $('settings').classList.toggle('hidden');
+$('scenarioPreset').addEventListener('change', () => {
+  if (!$('scenarioPreset').value) return;
+  $('scenario').value = $('scenarioPreset').value;
+  try { localStorage.setItem('sp_scenario', $('scenario').value); } catch (e) {}
+});
 $('provider').addEventListener('change', () => {
   const [base, models] = $('provider').value.split('|');
   if (base !== 'custom') { $('baseUrl').value = base; $('model').value = models; }
