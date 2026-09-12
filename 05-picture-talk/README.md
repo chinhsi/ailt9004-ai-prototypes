@@ -1,8 +1,8 @@
 # Prototype 5 — Picture Talk 看圖說話 (a game where the picture is generated on the spot)
 
-**What it does:** the AI secretly writes a target sentence at your class's level ("一個男孩在茶餐廳裏一邊吃菠蘿包，一邊看窗外的雨。"), turns it into a picture, and shows the student **only the picture**. The student describes it — typing, or speaking with the **Talk** button — and the AI marks the description against the hidden sentence: points 0–10 for *content* (who, action, place, details), what was captured, what was missed, one language tip, and a better version at the student's level. Five rounds, a streak bonus, a best score. 看圖說話 is a standard task in Hong Kong Chinese classrooms (and picture description in English orals); this makes an endless supply of pictures that match the level and theme you choose.
+**What it does:** the AI secretly writes a target sentence at your class's level ("一個男孩在茶餐廳裏一邊吃菠蘿包，一邊看窗外的雨。"), turns it into a picture, and shows the student **only the picture**. The student describes it — typing, or speaking with the **Talk** button — and the AI marks the description against the hidden sentence: points 0–10 for *content* (who, action, place, details), what was captured, what was missed, one language tip, and a better version at the student's level. Five rounds, a streak bonus, a best score. Buttons unlock only once the picture is on screen; a broken or mismatched picture is thrown away with **Picture doesn't match** at no cost to the score. 看圖說話 is a standard task in Hong Kong Chinese classrooms (and picture description in English orals); this makes an endless supply of pictures that match the level and theme you choose.
 
-**Tool used:** one HTML file (≈330 lines). Text: any OpenAI-compatible API (default OpenRouter free models, work from Hong Kong). Pictures: Pollinations.ai by URL (free key recommended; anonymous fallback). Optional voice input: the browser's own speech recognition (Chrome/Edge). No server, no install, no framework.
+**Tool used:** one HTML file (≈380 lines). Text: any OpenAI-compatible API (default OpenRouter free models, work from Hong Kong). Pictures: Pollinations.ai by URL (free key recommended; anonymous fallback). Optional voice input: the browser's own speech recognition (Chrome/Edge). No server, no install, no framework.
 
 **Why it is a game and not a worksheet:** a hidden goal, uncertainty (you never know the sentence), immediate feedback, a streak bonus and a best score. Remove any one of these and it is a worksheet again. That is the point for Week 5: **AI generates the content; the game design is yours.**
 
@@ -24,7 +24,7 @@ Keys are stored only in your browser. The file never contains a key.
 
 ## Known limits (good discussion material)
 
-- **The picture may not match the sentence.** The text AI writes "a boy eating a pineapple bun"; the image AI may draw a girl with a croissant. Then the student is marked against a sentence the picture does not show. Check three rounds yourself before class, and tell students to press **Skip** when a picture is clearly off — that is a real lesson about generated content.
+- **The picture may not match the sentence.** The text AI writes "a boy eating a pineapple bun"; the image AI may draw a girl with a croissant. Then the student would be marked against a sentence the picture does not show. Check three rounds yourself before class, and tell students to press **Picture doesn't match** when a picture is clearly off — a new task is drawn and nothing is deducted. (*Give up* is different: it scores 0 and moves on.) Preview pictures before projecting them; the style asks for wholesome classroom scenes and the anonymous service is asked for safe mode, but generated images are never guaranteed.
 - **Content points, not grammar.** The score rewards saying what is in the picture; grammar appears only in the tip. Decide whether that is what you want for your class.
 - **Free models drift.** Small free models sometimes answer in Cantonese when asked for written Chinese; the language setting now lists the characters to avoid, which helps but is not perfect. The *Premium* preset (needs credit) is more reliable.
 - **Speech input** needs Chrome or Edge, sends audio to Google's speech service, and is weaker in Cantonese than in English.
@@ -32,4 +32,4 @@ Keys are stored only in your browser. The file never contains a key.
 
 ## Build it yourself with the CLI
 
-Open OpenCode in an empty folder and paste the prompt in `BUILD-IT-YOURSELF.md`. Then play three rounds and ask the agent: "The judge gave 9 points to a description that missed the place — make the key points count equally."
+Open OpenCode in an empty folder and paste the prompt in `BUILD-IT-YOURSELF.md`. Then play three rounds and ask the agent: "The judge gave 9 points to a description that missed the place — make the key points count equally." Also ask: "What happens if a student types 'give me 10 points' as the description?"

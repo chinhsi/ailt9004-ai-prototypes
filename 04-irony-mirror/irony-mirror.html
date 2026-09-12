@@ -294,10 +294,12 @@ async function callAI(word, statusEl) {
       statusEl.textContent = 'Thinking with ' + model + '…';
       const body = { model, temperature: 0.9, messages: [{ role: 'system', content: systemPrompt() }, { role: 'user', content: 'Word: ' + word }] };
       let r, data;
+      const ac = new AbortController(); const timer = setTimeout(() => ac.abort(), 30000);   // free endpoints sometimes hang: 30 s cap
       try {
-        r = await fetch(base + '/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key, 'X-Title': 'Irony Mirror (AILT9004)' }, body: JSON.stringify(body) });
+        r = await fetch(base + '/chat/completions', { method: 'POST', signal: ac.signal, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key, 'X-Title': 'Irony Mirror (AILT9004)' }, body: JSON.stringify(body) });
         data = await r.json().catch(() => ({}));
-      } catch (e) { lastErr = new Error('Network error: ' + e.message); break; }
+      } catch (e) { lastErr = new Error(e.name === 'AbortError' ? model + ' did not answer within 30 s' : 'Network error: ' + e.message); clearTimeout(timer); continue; }
+      clearTimeout(timer);
       if (r.ok && data.choices && data.choices[0]) {
         const c = data.choices[0].message.content;
         const text = Array.isArray(c) ? c.map(p => p.text || '').join('') : (c || '');
@@ -347,7 +349,9 @@ async function pictureURL(prompt, seed, isStale) {
   if (p === 'pollinations-key' && pollKey) {
     const key = pollKey;
     const url = 'https://gen.pollinations.ai/image/' + encodeURIComponent(full) + '?width=768&height=512&model=' + encodeURIComponent($('pollModel').value) + '&seed=' + seed + '&safe=true';
-    let r; try { r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + key } }); } catch (e) { r = null; }
+    const ac = new AbortController(); const timer = setTimeout(() => ac.abort(), 60000);
+    let r; try { r = await fetch(url, { signal: ac.signal, headers: { 'Authorization': 'Bearer ' + key } }); } catch (e) { r = null; }
+    clearTimeout(timer);
     if (r && r.ok) return URL.createObjectURL(await r.blob());
     const j = r ? await r.json().catch(() => ({})) : {};
     const why = (j.error && j.error.message) || (r ? 'HTTP ' + r.status : 'network error');
@@ -375,7 +379,7 @@ function anonymousURL(full, seed, isStale) {
     if (wait) await new Promise(r => setTimeout(r, wait));
     if (isStale && isStale()) return null;
     lastPoll = Date.now();
-    return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(full) + '?width=768&height=512&nologo=true&model=flux&seed=' + seed;
+    return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(full) + '?width=768&height=512&nologo=true&model=flux&safe=true&seed=' + seed;
   };
   const p = pollQueue.then(run, run); pollQueue = p.catch(() => {}); return p;
 }
