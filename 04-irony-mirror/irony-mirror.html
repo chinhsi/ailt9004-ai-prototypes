@@ -150,6 +150,7 @@
     </div>
 
     <div class="panel gap" style="margin-top:14px">
+      <div id="safety" class="safety hidden" style="margin-bottom:10px"></div>
       <h3>The gap 落差 <span class="tag" id="ironyType"></span></h3>
       <p id="gapText"></p>
       <h3 style="margin-top:10px">Talk about it</h3>
@@ -157,7 +158,6 @@
       <h3>Now you write one 試寫一句反諷</h3>
       <p id="modelSentence" style="font-style:italic"></p>
       <textarea class="wide" id="student" placeholder="Write your own ironic sentence about this word…"></textarea>
-      <div id="safety" class="safety hidden"></div>
     </div>
 
     <div class="panel" id="cardWrap">
@@ -241,7 +241,7 @@ Produce a JSON object with exactly these keys:
 {
  "word": the word as given,
  "sincere": one-sentence sincere dictionary-style meaning,
- "ironic": ONE biting, witty redefinition in the spirit of 錢鍾書 / 王朔 / Oscar Wilde: say the opposite of what is expected and expose the gap between what people SAY and what they DO. Max 40 characters (or 20 English words). No real people; no ethnic, religious, gender or disability targets; mock behaviours, not groups.
+ "ironic": ONE sharp but kind, witty redefinition in the spirit of 錢鍾書 / Oscar Wilde: say the opposite of what is expected and expose the gap between what people SAY and what they DO. Max 40 characters (or 20 English words). Mock behaviours, never people or groups: no real people; no ethnic, national (including mainland/Hong Kong), religious, gender, sexuality, disability, body/appearance, class or domestic-worker stereotypes; no jokes about death, grief, illness, poverty, family break-up or academic failure — some students in the room live with these.
  "sceneA": {"caption": one short sentence describing the value done sincerely by ordinary people, "imagePrompt": an English prompt for an image generator: one concrete everyday scene, two or three people at most, clear actions, no text in the image},
  "sceneB": {"caption": one short sentence describing the ironic scene where words claim the value and actions show the opposite, "imagePrompt": English prompt for the SAME setting and people as sceneA, but now the claim is visible as a symbol (a glowing heart icon on a phone, a medal, a banner, a thumbs-up) while the action in the foreground shows the opposite; describe exactly two figures, their body language and where each is looking, so the contradiction is visible without words; no text in the image},
  "ironyType": "verbal" | "situational" | "dramatic",
@@ -320,7 +320,18 @@ function parseJSON(text) {
   let t = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   const a = t.indexOf('{'), b = t.lastIndexOf('}');
   if (a < 0 || b < 0) return null;
-  try { const o = JSON.parse(t.slice(a, b + 1)); return (o && o.sceneA && o.sceneB) ? o : null; } catch (e) { return null; }
+  try { return normalize(JSON.parse(t.slice(a, b + 1))); } catch (e) { return null; }
+}
+// Free models sometimes return strings where objects are expected, or skip a field: coerce everything to the shape render() needs.
+function normalize(o) {
+  if (!o || typeof o !== 'object') return null;
+  const str = v => (v == null) ? '' : (typeof v === 'string' ? v : (typeof v === 'object' ? JSON.stringify(v) : String(v)));
+  const scene = v => (v && typeof v === 'object') ? { caption: str(v.caption), imagePrompt: str(v.imagePrompt || v.prompt) } : { caption: str(v), imagePrompt: str(v) };
+  const out = { word: str(o.word), sincere: str(o.sincere), ironic: str(o.ironic), sceneA: scene(o.sceneA), sceneB: scene(o.sceneB),
+    ironyType: str(o.ironyType).toLowerCase() || 'situational', gap: str(o.gap), modelSentence: str(o.modelSentence), safetyNote: str(o.safetyNote),
+    questions: Array.isArray(o.questions) ? o.questions.map(str).filter(Boolean).slice(0, 5) : (o.questions ? [str(o.questions)] : []) };
+  if (!out.ironic || !out.sceneA.imagePrompt || !out.sceneB.imagePrompt) return null;   // too little to work with: caller retries
+  return out;
 }
 
 // ---------- pictures ----------
@@ -328,7 +339,7 @@ function parseJSON(text) {
 //  - with a free key: GET https://gen.pollinations.ai/image/{prompt}?model=…  (Authorization: Bearer pk_…) -> we fetch it and show the blob
 //  - anonymous:       GET https://image.pollinations.ai/prompt/{prompt}?…       (one queued picture per IP, ~15 s apart, watermark)
 let lastPoll = 0;
-async function pictureURL(prompt, seed) {
+async function pictureURL(prompt, seed, isStale) {
   const p = $('imgProvider').value;
   const full = $('style').value + '. ' + prompt;
   if (p === 'none') return null;
@@ -336,16 +347,14 @@ async function pictureURL(prompt, seed) {
   if (p === 'pollinations-key' && pollKey) {
     const key = pollKey;
     const url = 'https://gen.pollinations.ai/image/' + encodeURIComponent(full) + '?width=768&height=512&model=' + encodeURIComponent($('pollModel').value) + '&seed=' + seed + '&safe=true';
-    const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + key } });
-    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); }
-    return URL.createObjectURL(await r.blob());
+    let r; try { r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + key } }); } catch (e) { r = null; }
+    if (r && r.ok) return URL.createObjectURL(await r.blob());
+    const j = r ? await r.json().catch(() => ({})) : {};
+    const why = (j.error && j.error.message) || (r ? 'HTTP ' + r.status : 'network error');
+    if (!keyWarned) { keyWarned = true; $('status').className = 'status err'; $('status').textContent = 'Pollinations key problem (' + why + ') — using the anonymous picture service instead. Check the key at enter.pollinations.ai/keys.'; }
+    return anonymousURL(full, seed, isStale);
   }
-  if (p === 'pollinations' || p === 'pollinations-key') {   // anonymous (also the fallback when no Pollinations key is given)
-    const wait = Math.max(0, lastPoll + 15500 - Date.now());
-    lastPoll = Date.now() + wait;
-    await new Promise(r => setTimeout(r, wait));
-    return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(full) + '?width=768&height=512&nologo=true&model=flux&seed=' + seed;
-  }
+  if (p === 'pollinations' || p === 'pollinations-key') return anonymousURL(full, seed, isStale);   // no key given: anonymous
   // Any OpenAI-compatible images endpoint (e.g. a school server, or a provider that allows your account)
   const base = $('imgBase').value.trim().replace(/\/+$/, '');
   const r = await fetch(base + '/images/generations', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + $('imgKey').value.trim() },
@@ -353,19 +362,38 @@ async function pictureURL(prompt, seed) {
   const data = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error((data.error && data.error.message) || 'HTTP ' + r.status);
   const d = data.data && data.data[0];
+  if (!d || (!d.url && !d.b64_json)) throw new Error('the image API returned no image');
   return d.url || ('data:image/png;base64,' + d.b64_json);
 }
+let keyWarned = false, pollQueue = Promise.resolve();
+// Anonymous Pollinations allows one queued picture per IP, so requests go through a queue spaced 15 s apart.
+// A request whose box has moved on (isStale) gives up its turn instead of wasting a slot.
+function anonymousURL(full, seed, isStale) {
+  const run = async () => {
+    if (isStale && isStale()) return null;
+    const wait = Math.max(0, lastPoll + 15500 - Date.now());
+    if (wait) await new Promise(r => setTimeout(r, wait));
+    if (isStale && isStale()) return null;
+    lastPoll = Date.now();
+    return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(full) + '?width=768&height=512&nologo=true&model=flux&seed=' + seed;
+  };
+  const p = pollQueue.then(run, run); pollQueue = p.catch(() => {}); return p;
+}
 async function showPicture(el, prompt, seed) {
+  const token = String(Math.random());          // a newer request for the same box wins; older ones are ignored
+  el.dataset.token = token;
+  if (el.dataset.blob) { try { URL.revokeObjectURL(el.dataset.blob); } catch (e) {} delete el.dataset.blob; }
   el.textContent = $('imgProvider').value === 'none' ? 'Pictures are off (Settings). Copy the prompt into any image tool.' : 'Drawing… (about 15–45 s)';
   try {
-    const url = await pictureURL(prompt, seed);
-    if (!url) return;
+    const url = await pictureURL(prompt, seed, () => el.dataset.token !== token);
+    if (!url || el.dataset.token !== token) return;
     const img = new Image();
     img.alt = prompt;
-    img.onload = () => { el.textContent = ''; el.appendChild(img); };
-    img.onerror = () => { el.textContent = 'The picture service is busy (anonymous use allows one picture at a time per network). Wait, press "New picture", get a free key in Settings, or copy the prompt into another tool.'; };
+    if (url.startsWith('blob:')) el.dataset.blob = url;
+    img.onload = () => { if (el.dataset.token !== token) return; el.textContent = ''; el.appendChild(img); };
+    img.onerror = () => { if (el.dataset.token !== token) return; el.textContent = 'The picture service is busy (anonymous use allows one picture at a time per network). Wait, press "New picture", get a free key in Settings, or copy the prompt into another tool.'; };
     img.src = url;
-  } catch (e) { el.textContent = 'Picture failed: ' + e.message; }
+  } catch (e) { if (el.dataset.token === token) el.textContent = 'Picture failed: ' + e.message; }
 }
 
 // ---------- explore ----------
@@ -375,13 +403,15 @@ $('chips').addEventListener('click', e => { if (e.target.tagName === 'BUTTON') {
 $('go').addEventListener('click', mirror);
 $('word').addEventListener('keydown', e => { if (e.key === 'Enter') mirror(); });
 let current = null, seeds = { A: 1, B: 2 };
-const cache = JSON.parse(load('cache', '{}'));
+let cache = {};
+try { const c = JSON.parse(load('cache', '{}')); if (c && typeof c === 'object' && !Array.isArray(c)) cache = c; } catch (e) {}
 function remember(word, obj) { cache[word] = obj; const keys = Object.keys(cache); while (keys.length > 12) delete cache[keys.shift()]; store('cache', JSON.stringify(cache)); renderHist(); }
 function renderHist() {
   const k = Object.keys(cache);
-  $('hist').innerHTML = k.length ? 'Recent (no API call): ' + k.map(w => `<button class="ghost" data-w="${w}">${w}</button>`).join('') : '';
+  $('hist').textContent = k.length ? 'Recent (no API call): ' : '';
+  k.forEach(w => { const b = document.createElement('button'); b.className = 'ghost'; b.dataset.w = w; b.textContent = w; $('hist').appendChild(b); });
 }
-$('hist').addEventListener('click', e => { const w = e.target.dataset.w; if (w) { $('word').value = w; render(cache[w]); } });
+$('hist').addEventListener('click', e => { const w = e.target.dataset.w; if (w && cache[w]) { const o = normalize(cache[w]); if (o) { $('word').value = w; render(o); } } });
 renderHist();
 
 async function mirror() {
@@ -389,7 +419,7 @@ async function mirror() {
   if (!word) return;
   $('go').disabled = true; $('status').className = 'status';
   try {
-    const obj = cache[word] || await callAI(word, $('status'));
+    const obj = normalize(cache[word]) || await callAI(word, $('status'));
     remember(word, obj);
     $('status').textContent = '';
     render(obj);
@@ -481,6 +511,7 @@ let G = null, tick = null;
 $('startGame').addEventListener('click', async () => {
   const words = $('gameWords').value.split(/[,，]/).map(w => w.trim()).filter(Boolean);
   if (!words.length) return;
+  clearInterval(tick); $('startGame').disabled = true;
   G = { words, i: 0, score: 0, picked: null, data: null };
   $('roundTotal').textContent = words.length; $('score').textContent = 0;
   $('gameEnd').classList.add('hidden'); $('gameRound').classList.remove('hidden');
@@ -489,18 +520,21 @@ $('startGame').addEventListener('click', async () => {
 async function playRound() {
   const word = G.words[G.i];
   $('roundNo').textContent = G.i + 1; $('gameWord').textContent = word;
-  $('gameVerdict').textContent = ''; $('gameGap').value = ''; $('gameReveal').classList.add('hidden'); $('nextRound').classList.add('hidden'); $('reveal').disabled = false;
+  $('gameVerdict').textContent = ''; $('gameGap').value = ''; $('gameReveal').classList.add('hidden'); $('nextRound').classList.add('hidden'); $('reveal').disabled = false; $('gcapL').textContent = ''; $('gcapR').textContent = '';
   document.querySelectorAll('.choice').forEach(c => { c.classList.remove('picked', 'wrong'); });
   $('gstatus').className = 'status';
+  const mine = G;
   try {
-    G.data = cache[word] || await callAI(word, $('gstatus'));
+    G.data = normalize(cache[word]) || await callAI(word, $('gstatus'));
     remember(word, G.data);
-  } catch (e) { $('gstatus').className = 'status err'; $('gstatus').textContent = e.message; return; }
-  $('gstatus').textContent = '';
+  } catch (e) { $('gstatus').className = 'status err'; $('gstatus').textContent = e.message; $('startGame').disabled = false; return; }
+  if (G !== mine) return;                       // a new game was started while this one was loading
+  $('gstatus').textContent = ''; $('startGame').disabled = false;
   G.ironicSide = Math.random() < 0.5 ? 'L' : 'R'; G.picked = null;
   const A = G.data.sceneA, B = G.data.sceneB;
   const left = G.ironicSide === 'L' ? B : A, right = G.ironicSide === 'L' ? A : B;
-  $('gcapL').textContent = left.caption; $('gcapR').textContent = right.caption;
+  G.caps = { L: left.caption, R: right.caption };
+  $('gcapL').textContent = 'Look first. The caption appears after you choose.'; $('gcapR').textContent = 'Look first. The caption appears after you choose.';
   showPicture($('gpicL'), left.imagePrompt, Math.floor(Math.random() * 1e6));
   showPicture($('gpicR'), right.imagePrompt, Math.floor(Math.random() * 1e6));
   clearInterval(tick);
@@ -511,7 +545,9 @@ async function playRound() {
 }
 document.querySelectorAll('.choice').forEach(c => c.addEventListener('click', () => { if (G && G.picked === null && G.data) judge(c.dataset.side); }));
 function judge(side) {
+  if (!G || !G.data || !G.ironicSide || G.picked !== null) return;
   G.picked = side || 'none'; clearInterval(tick);
+  $('gcapL').textContent = G.caps.L; $('gcapR').textContent = G.caps.R;
   const right = side === G.ironicSide;
   if (right) G.score++;
   $('score').textContent = G.score;

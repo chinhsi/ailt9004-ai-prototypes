@@ -1044,3 +1044,112 @@ example-output/punctuality.json
 example-output/孝順.json
 {"word": "孝順", "sincere": "孝順是真心尊敬和照顧父母，在言行上體貼他們的需要與感受。", "ironic": "孝順是父母健在時身在他鄉，出殯時哭得最大聲。", "sceneA": {"caption": "放學後陪母親食一碗雲吞麵，聽她講當日小事。", "imagePrompt": "A Hong Kong cha chaan teng in the evening, a teenage girl and her mother sit at a small table sharing one bowl of wonton noodles, the girl gently passes a spoon to her mother, warm fluorescent light, intimate and caring mood, no text."}, "sceneB": {"caption": "同一餐館，女孩對着母親低頭滑手機，座位隔開三尺。", "imagePrompt": "Same Hong Kong cha chaan teng setting, two figures at the same small table: the mother sits close and leans to speak, while the teenage girl holds a phone glowing with a bright red heart icon, turned away and scrolling, body angled away from the mother, the mother looks at the girl expectantly, no other diners visible, no text."}, "ironyType": "situational", "gap": "孝順常被掛在嘴邊，真正做到的時刻卻被手機螢幕隔開。", "questions": ["你認為花時間陪伴父母，和給他們零用錢或禮物，哪一樣比較算孝順？", "在社交媒體上公開說「要孝順父母」，和實際在家裏的行為，為甚麼會有差別？", "如果發現自己或朋友「口講孝順、行為相反」，你會用甚麼方法提醒而不傷感情？"], "modelSentence": "他每逢清明節都在社交媒體上寫「孝感動天」，卻連母親生日那天也不記得回家吃飯。", "safetyNote": ""}example-output/誠實.json
 {"word": "誠實", "sincere": "誠實是言行一致、不欺不瞞，說出來的和做出來的一樣。", "ironic": "誠實：一種因為說謊技巧太差，才不得不誠實的品質。", "sceneA": {"caption": "學生買完東西，把店員多找的錢一分不少地還回去。", "imagePrompt": "A small Hong Kong neighbourhood grocery store at dusk, a teenage student in school uniform standing at the counter holding out a handful of extra coins toward the adult shop owner, who nods with a warm approving smile, bright warm light, everyday realistic scene, no text in the image"}, "sceneB": {"caption": "店裏掛着「童叟無欺」的招牌，店主收起多找的錢，若無其事。", "imagePrompt": "The same small grocery store from the same angle, two figures: the adult shop owner holding a phone that glows with a bright heart icon while his other hand pulls a stack of coins toward himself on the counter, his face turned toward the screen and away from the customer; the teenage student staring at the owner's hand with a puzzled, betrayed expression, both figures' body language showing the contradiction between the glowing claim and the hidden action, no text in the image"}, "ironyType": "situational", "gap": "店主掛着「誠實」的招牌讚美誠實，收銀時卻把多找的錢悄悄據為己有——說出來的榮耀，做出來的是貪。", "questions": ["你覺得在甚麼情況下說謊是可以接受的？同學抄功課、報錯測驗分數，是同一回事嗎？", "文中店主一面強調誠實一面收膨脹的錢，你認為人會「明知虛偽卻照做」嗎？為甚麼？", "如果誠實會令朋友難堪或令自己吃虧，你還會選擇誠實嗎？試舉一個生活例子。"], "modelSentence": "他拍心口說自己一生誠實，說這句話時，手正忙著把找回的零錢收進口袋。", "safetyNote": ""}
+codex
+**Overall Verdict**
+
+Promising and mostly well-scoped for a single-file classroom prototype, but not yet classroom-safe enough. The main risks are stale async image/game state, fragile handling of malformed API data, localStorage/cache crashes, and a prompt that can drift from “humane irony” into hurtful moral judgement. The XSS surface is smaller than it first looks in the main lesson view, but the cache/history path is a real injection risk.
+
+**Top 10 Findings**
+
+1. **High: Cache/history can XSS from user or poisoned localStorage.**  
+   [irony-mirror.html:378](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:378), [382](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:382)  
+   Code: `const cache = JSON.parse(load('cache', '{}'));` and `` `<button class="ghost" data-w="${w}">${w}</button>` ``.  
+   A malicious cached key can break the attribute and inject HTML. Fix: parse cache in `try/catch`, validate it is a plain object, and build history buttons with `document.createElement`, `textContent`, and `dataset.w` instead of `innerHTML`.
+
+2. **High: Stale image requests can overwrite newer rounds/results.**  
+   [irony-mirror.html:365](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:365), [411-412](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:411), [504-505](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:504)  
+   Code: `img.onload = () => { el.textContent = ''; el.appendChild(img); };`  
+   If a teacher changes words, starts game, or presses New picture while an old request is pending, the old `onload` may append the wrong picture. Fix: store a request token on the element, e.g. `el.dataset.picToken = token`, and only append if it still matches.
+
+3. **High: Blob URLs leak memory and can pile up during class use.**  
+   [irony-mirror.html:341](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:341)  
+   Code: `return URL.createObjectURL(await r.blob());`  
+   No `URL.revokeObjectURL()` is called. Fix: keep the previous blob URL on the image container and revoke it before replacing; optionally revoke after image load once it is no longer needed.
+
+4. **High: Game timer/state can corrupt a newly started game.**  
+   [irony-mirror.html:481-487](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:481), [506-509](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:506)  
+   Code clears the old timer only inside `playRound()`, after the AI call: `clearInterval(tick);`.  
+   Starting a new game while an old timer is running can call `judge(null)` against the new `G` before `G.data`/`G.ironicSide` exist. Fix: `clearInterval(tick)` immediately in `startGame`, disable Start while loading, and guard `judge()` with `if (!G || !G.data || !G.ironicSide) return;`.
+
+5. **Medium-high: Malformed model JSON passes too little validation and can crash render.**  
+   [irony-mirror.html:323](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:323), [402-412](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:402)  
+   Code: `return (o && o.sceneA && o.sceneB) ? o : null;`.  
+   This accepts `questions: "..."`, `sceneA: "text"`, missing `imagePrompt`, etc. Then `(o.questions || []).map(...)` can throw. Fix: normalize after parse: coerce strings, default missing scenes to `{caption:'', imagePrompt:''}`, ensure `questions` is an array of exactly/at most 3 strings, and show “The model skipped X; try again or switch model.”
+
+6. **Medium-high: Pollinations keyed mode does not fall back when the key/API fails.**  
+   [irony-mirror.html:336-341](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:336), [343](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:343)  
+   Code only falls back anonymously when no key is present: `if (p === 'pollinations-key' && pollKey) { ... throw ... }`.  
+   A 401/403/429/402 becomes `Picture failed: HTTP ...`, despite the product promise of anonymous fallback. Fix: on keyed failure, append an actionable message and optionally retry anonymous once, rate-limited.
+
+7. **Medium: OpenAI-compatible image response handling can throw on missing fields.**  
+   [irony-mirror.html:355-356](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:355)  
+   Code: `return d.url || ('data:image/png;base64,' + d.b64_json);`  
+   If `data.data` is empty, `d` is undefined. If neither `url` nor `b64_json` exists, it returns broken data. Fix: explicitly check `if (!d || (!d.url && !d.b64_json)) throw new Error('Image API returned no image.');`.
+
+8. **Medium: Game pedagogy is undermined by showing captions before the guess.**  
+   [irony-mirror.html:503](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:503)  
+   Code: `$('gcapL').textContent = left.caption; $('gcapR').textContent = right.caption;`  
+   `BUILD-IT-YOURSELF.md` says the game should show pictures “WITHOUT labels”; captions often reveal the answer. Fix: hide captions until Reveal, or replace with neutral “Picture 1 / Picture 2” during guessing.
+
+9. **Medium: Safety prompt is not strong enough for HK S3-4 classrooms.**  
+   [irony-mirror.html:244](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:244), [251](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:251)  
+   Code asks for “ONE biting, witty redefinition” and only blocks “ethnic, religious, gender or disability targets.” Example output for `孝順` includes death/funeral imagery, which could hurt students with bereavement or family stress. Fix: change “biting” to “sharp but kind,” ban grief/illness/death, poverty, body/appearance, academic ability, family structure, nationality/mainland-HK stereotypes, and domestic-worker/class stereotypes. Also move `safetyNote` before the activity content.
+
+10. **Low-medium: README/BUILD accuracy drifts from code.**  
+   [README.md:7](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/README.md:7), [BUILD-IT-YOURSELF.md:11](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/BUILD-IT-YOURSELF.md:11), [BUILD-IT-YOURSELF.md:18](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/BUILD-IT-YOURSELF.md:18)  
+   README says keyed Pollinations “falls back” generally, but code only falls back when no key is entered. BUILD says retry `429/502/503`; code also retries `404` at [313](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:313). BUILD says “Keep it under 500 lines,” but the file is 540 lines. Fix docs or code so teachers are not debugging contradictory instructions.
+tokens used
+47,675
+**Overall Verdict**
+
+Promising and mostly well-scoped for a single-file classroom prototype, but not yet classroom-safe enough. The main risks are stale async image/game state, fragile handling of malformed API data, localStorage/cache crashes, and a prompt that can drift from “humane irony” into hurtful moral judgement. The XSS surface is smaller than it first looks in the main lesson view, but the cache/history path is a real injection risk.
+
+**Top 10 Findings**
+
+1. **High: Cache/history can XSS from user or poisoned localStorage.**  
+   [irony-mirror.html:378](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:378), [382](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:382)  
+   Code: `const cache = JSON.parse(load('cache', '{}'));` and `` `<button class="ghost" data-w="${w}">${w}</button>` ``.  
+   A malicious cached key can break the attribute and inject HTML. Fix: parse cache in `try/catch`, validate it is a plain object, and build history buttons with `document.createElement`, `textContent`, and `dataset.w` instead of `innerHTML`.
+
+2. **High: Stale image requests can overwrite newer rounds/results.**  
+   [irony-mirror.html:365](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:365), [411-412](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:411), [504-505](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:504)  
+   Code: `img.onload = () => { el.textContent = ''; el.appendChild(img); };`  
+   If a teacher changes words, starts game, or presses New picture while an old request is pending, the old `onload` may append the wrong picture. Fix: store a request token on the element, e.g. `el.dataset.picToken = token`, and only append if it still matches.
+
+3. **High: Blob URLs leak memory and can pile up during class use.**  
+   [irony-mirror.html:341](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:341)  
+   Code: `return URL.createObjectURL(await r.blob());`  
+   No `URL.revokeObjectURL()` is called. Fix: keep the previous blob URL on the image container and revoke it before replacing; optionally revoke after image load once it is no longer needed.
+
+4. **High: Game timer/state can corrupt a newly started game.**  
+   [irony-mirror.html:481-487](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:481), [506-509](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:506)  
+   Code clears the old timer only inside `playRound()`, after the AI call: `clearInterval(tick);`.  
+   Starting a new game while an old timer is running can call `judge(null)` against the new `G` before `G.data`/`G.ironicSide` exist. Fix: `clearInterval(tick)` immediately in `startGame`, disable Start while loading, and guard `judge()` with `if (!G || !G.data || !G.ironicSide) return;`.
+
+5. **Medium-high: Malformed model JSON passes too little validation and can crash render.**  
+   [irony-mirror.html:323](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:323), [402-412](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:402)  
+   Code: `return (o && o.sceneA && o.sceneB) ? o : null;`.  
+   This accepts `questions: "..."`, `sceneA: "text"`, missing `imagePrompt`, etc. Then `(o.questions || []).map(...)` can throw. Fix: normalize after parse: coerce strings, default missing scenes to `{caption:'', imagePrompt:''}`, ensure `questions` is an array of exactly/at most 3 strings, and show “The model skipped X; try again or switch model.”
+
+6. **Medium-high: Pollinations keyed mode does not fall back when the key/API fails.**  
+   [irony-mirror.html:336-341](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:336), [343](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:343)  
+   Code only falls back anonymously when no key is present: `if (p === 'pollinations-key' && pollKey) { ... throw ... }`.  
+   A 401/403/429/402 becomes `Picture failed: HTTP ...`, despite the product promise of anonymous fallback. Fix: on keyed failure, append an actionable message and optionally retry anonymous once, rate-limited.
+
+7. **Medium: OpenAI-compatible image response handling can throw on missing fields.**  
+   [irony-mirror.html:355-356](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:355)  
+   Code: `return d.url || ('data:image/png;base64,' + d.b64_json);`  
+   If `data.data` is empty, `d` is undefined. If neither `url` nor `b64_json` exists, it returns broken data. Fix: explicitly check `if (!d || (!d.url && !d.b64_json)) throw new Error('Image API returned no image.');`.
+
+8. **Medium: Game pedagogy is undermined by showing captions before the guess.**  
+   [irony-mirror.html:503](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:503)  
+   Code: `$('gcapL').textContent = left.caption; $('gcapR').textContent = right.caption;`  
+   `BUILD-IT-YOURSELF.md` says the game should show pictures “WITHOUT labels”; captions often reveal the answer. Fix: hide captions until Reveal, or replace with neutral “Picture 1 / Picture 2” during guessing.
+
+9. **Medium: Safety prompt is not strong enough for HK S3-4 classrooms.**  
+   [irony-mirror.html:244](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:244), [251](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:251)  
+   Code asks for “ONE biting, witty redefinition” and only blocks “ethnic, religious, gender or disability targets.” Example output for `孝順` includes death/funeral imagery, which could hurt students with bereavement or family stress. Fix: change “biting” to “sharp but kind,” ban grief/illness/death, poverty, body/appearance, academic ability, family structure, nationality/mainland-HK stereotypes, and domestic-worker/class stereotypes. Also move `safetyNote` before the activity content.
+
+10. **Low-medium: README/BUILD accuracy drifts from code.**  
+   [README.md:7](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/README.md:7), [BUILD-IT-YOURSELF.md:11](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/BUILD-IT-YOURSELF.md:11), [BUILD-IT-YOURSELF.md:18](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/BUILD-IT-YOURSELF.md:18)  
+   README says keyed Pollinations “falls back” generally, but code only falls back when no key is entered. BUILD says retry `429/502/503`; code also retries `404` at [313](/Users/chinhsi/Google%20Drive/HKU/Courses/2026%2009/AILT9004/Materials/Prototypes/04-irony-mirror/irony-mirror.html:313). BUILD says “Keep it under 500 lines,” but the file is 540 lines. Fix docs or code so teachers are not debugging contradictory instructions.

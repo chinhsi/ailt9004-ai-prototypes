@@ -193,34 +193,50 @@ async function callAI(system, user, statusEl) {
 function parseJSON(text) {
   const t = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a < 0 || b < 0) return null;
-  try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; }
+  try { const o = JSON.parse(t.slice(a, b + 1)); return (o && typeof o === 'object') ? o : null; } catch (e) { return null; }
 }
+const str = v => (v == null) ? '' : (typeof v === 'string' ? v : (typeof v === 'object' ? JSON.stringify(v) : String(v)));
 
 // ---------- pictures (Pollinations: the picture is a URL) ----------
-let lastPoll = 0;
-async function pictureURL(prompt, seed) {
+let lastPoll = 0, keyWarned = false, pollQueue = Promise.resolve();
+// Anonymous Pollinations allows one queued picture per IP: a queue spaced 15 s apart; a stale request gives up its turn.
+function anonymousURL(full, seed, isStale) {
+  const run = async () => {
+    if (isStale && isStale()) return null;
+    const wait = Math.max(0, lastPoll + 15500 - Date.now());
+    if (wait) await new Promise(r => setTimeout(r, wait));
+    if (isStale && isStale()) return null;
+    lastPoll = Date.now();
+    return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(full) + '?width=768&height=512&nologo=true&model=flux&seed=' + seed;
+  };
+  const p = pollQueue.then(run, run); pollQueue = p.catch(() => {}); return p;
+}
+async function pictureURL(prompt, seed, isStale) {
   const full = $('style').value + '. ' + prompt;
   const key = $('pollKey').value.trim();
   if (key) {
     const url = 'https://gen.pollinations.ai/image/' + encodeURIComponent(full) + '?width=768&height=512&model=' + encodeURIComponent($('pollModel').value) + '&seed=' + seed + '&safe=true';
-    const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + key } });
-    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); }
-    return URL.createObjectURL(await r.blob());
+    let r; try { r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + key } }); } catch (e) { r = null; }
+    if (r && r.ok) return URL.createObjectURL(await r.blob());
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!keyWarned) { keyWarned = true; $('rstatus').className = 'status err'; $('rstatus').textContent = 'Pollinations key problem (' + ((j.error && j.error.message) || (r ? 'HTTP ' + r.status : 'network error')) + ') — using the anonymous picture service instead.'; }
   }
-  const wait = Math.max(0, lastPoll + 15500 - Date.now()); lastPoll = Date.now() + wait;
-  await new Promise(r => setTimeout(r, wait));
-  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(full) + '?width=768&height=512&nologo=true&model=flux&seed=' + seed;
+  return anonymousURL(full, seed, isStale);
 }
 function showPicture(el, prompt, seed) {
   return new Promise(async resolve => {
+    const token = String(Math.random()); el.dataset.token = token;      // a newer request wins; stale ones are ignored
+    if (el.dataset.blob) { try { URL.revokeObjectURL(el.dataset.blob); } catch (e) {} delete el.dataset.blob; }
     el.textContent = 'Drawing… (15–45 s)';
     try {
-      const url = await pictureURL(prompt, seed);
+      const url = await pictureURL(prompt, seed, () => el.dataset.token !== token);
+      if (!url || el.dataset.token !== token) return resolve(false);
+      if (url.startsWith('blob:')) el.dataset.blob = url;
       const img = new Image(); img.alt = 'picture to describe';
-      img.onload = () => { el.textContent = ''; el.appendChild(img); resolve(true); };
-      img.onerror = () => { el.textContent = 'The picture service is busy. Press Skip, or add a free Pollinations key in Settings.'; resolve(false); };
+      img.onload = () => { if (el.dataset.token !== token) return; el.textContent = ''; el.appendChild(img); resolve(true); };
+      img.onerror = () => { if (el.dataset.token !== token) return; el.textContent = 'The picture service is busy. Press Skip, or add a free Pollinations key in Settings.'; resolve(false); };
       img.src = url;
-    } catch (e) { el.textContent = 'Picture failed: ' + e.message; resolve(false); }
+    } catch (e) { if (el.dataset.token === token) el.textContent = 'Picture failed: ' + e.message; resolve(false); }
   });
 }
 
@@ -247,6 +263,7 @@ No code fences, no commentary.`;
 let G = null, recognition = null, listening = false;
 const langName = () => ({ 'English': 'English' }[$('lang').value] || ($('lang').value.includes('Cantonese') ? 'Cantonese 粵語' : 'Chinese 中文'));
 $('start').addEventListener('click', async () => {
+  if (listening && recognition) { try { recognition.stop(); } catch (e) {} }
   G = { i: 0, n: +$('rounds').value, score: 0, streak: 0, log: [] };
   $('rTotal').textContent = G.n; $('score').textContent = 0; $('streak').textContent = '';
   $('setup').classList.add('hidden'); $('end').classList.add('hidden'); $('round').classList.remove('hidden');
@@ -256,8 +273,13 @@ $('start').addEventListener('click', async () => {
 async function newRound() {
   $('rNo').textContent = G.i + 1; $('feedback').classList.add('hidden'); $('answer').value = ''; $('answer').disabled = false; $('submit').disabled = false; $('skip').disabled = false;
   $('rstatus').className = 'status';
-  try { G.cur = await callAI(makePrompt(), 'Make one task. Seed: ' + Math.random().toString(36).slice(2, 8), $('rstatus')); }
-  catch (e) { $('rstatus').className = 'status err'; $('rstatus').textContent = e.message; return; }
+  const mine = G;
+  try {
+    const o = await callAI(makePrompt(), 'Make one task. Seed: ' + Math.random().toString(36).slice(2, 8), $('rstatus'));
+    if (G !== mine) return;                                                        // a new game started meanwhile
+    G.cur = { target: str(o.target), keyPoints: Array.isArray(o.keyPoints) ? o.keyPoints.map(str) : [str(o.keyPoints)], imagePrompt: str(o.imagePrompt || o.prompt) };
+    if (!G.cur.target || !G.cur.imagePrompt) throw new Error('The model skipped the sentence or the picture prompt — press Next picture to try again.');
+  } catch (e) { $('rstatus').className = 'status err'; $('rstatus').textContent = e.message; $('feedback').classList.remove('hidden'); $('pts').textContent = '–'; $('target').textContent = ''; return; }
   $('rstatus').textContent = '';
   showPicture($('pic'), G.cur.imagePrompt, Math.floor(Math.random() * 1e6));
   $('answer').focus();
@@ -266,7 +288,7 @@ $('submit').addEventListener('click', () => judge(false));
 $('skip').addEventListener('click', () => judge(true));
 $('answer').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) judge(false); });
 async function judge(skipped) {
-  if (!G || !G.cur) return;
+  if (!G || !G.cur || !G.cur.target) return;
   const text = skipped ? '' : $('answer').value.trim();
   if (!skipped && !text) { $('rstatus').textContent = 'Write or say something first.'; return; }
   $('submit').disabled = true; $('skip').disabled = true; $('answer').disabled = true;
@@ -276,6 +298,7 @@ async function judge(skipped) {
     catch (e) { $('rstatus').className = 'status err'; $('rstatus').textContent = e.message; $('submit').disabled = false; $('answer').disabled = false; return; }
   }
   $('rstatus').textContent = '';
+  res = { points: res.points, got: str(res.got), missed: str(res.missed), tip: str(res.tip), better: str(res.better) };
   let pts = Math.max(0, Math.min(10, parseInt(res.points) || 0));
   G.streak = pts >= 7 ? G.streak + 1 : 0;
   let bonus = 0; if (G.streak && G.streak % 3 === 0) { bonus = 2; }
