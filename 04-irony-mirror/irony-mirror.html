@@ -352,10 +352,10 @@ async function pictureURL(prompt, seed, isStale) {
     const ac = new AbortController(); const timer = setTimeout(() => ac.abort(), 60000);
     let r; try { r = await fetch(url, { signal: ac.signal, headers: { 'Authorization': 'Bearer ' + key } }); } catch (e) { r = null; }
     clearTimeout(timer);
-    if (r && r.ok) return URL.createObjectURL(await r.blob());
+    if (r && r.ok) { const b = await r.blob(); if (isStale && isStale()) return null; return URL.createObjectURL(b); }
     const j = r ? await r.json().catch(() => ({})) : {};
     const why = (j.error && j.error.message) || (r ? 'HTTP ' + r.status : 'network error');
-    if (!keyWarned) { keyWarned = true; $('status').className = 'status err'; $('status').textContent = 'Pollinations key problem (' + why + ') — using the anonymous picture service instead. Check the key at enter.pollinations.ai/keys.'; }
+    if (!keyWarned) { keyWarned = true; const st = $('tab-game').classList.contains('hidden') ? $('status') : $('gstatus'); st.className = 'status err'; st.textContent = 'Pollinations key problem (' + why + ') — using the anonymous picture service instead. Check the key at enter.pollinations.ai/keys.'; }
     return anonymousURL(full, seed, isStale);
   }
   if (p === 'pollinations' || p === 'pollinations-key') return anonymousURL(full, seed, isStale);   // no key given: anonymous

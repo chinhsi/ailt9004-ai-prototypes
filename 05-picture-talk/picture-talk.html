@@ -222,7 +222,7 @@ async function pictureURL(prompt, seed, isStale) {
     const ac = new AbortController(); const timer = setTimeout(() => ac.abort(), 60000);
     let r; try { r = await fetch(url, { signal: ac.signal, headers: { 'Authorization': 'Bearer ' + key } }); } catch (e) { r = null; }
     clearTimeout(timer);
-    if (r && r.ok) return URL.createObjectURL(await r.blob());
+    if (r && r.ok) { const b = await r.blob(); if (isStale && isStale()) return null; return URL.createObjectURL(b); }
     const j = r ? await r.json().catch(() => ({})) : {};
     if (!keyWarned) { keyWarned = true; $('rstatus').className = 'status err'; $('rstatus').textContent = 'Pollinations key problem (' + ((j.error && j.error.message) || (r ? 'HTTP ' + r.status : 'network error')) + ') — using the anonymous picture service instead.'; }
   }
@@ -239,7 +239,7 @@ function showPicture(el, prompt, seed) {
       if (url.startsWith('blob:')) el.dataset.blob = url;
       const img = new Image(); img.alt = 'picture to describe';
       img.onload = () => { if (el.dataset.token !== token) return; el.textContent = ''; el.appendChild(img); resolve(true); };
-      img.onerror = () => { if (el.dataset.token !== token) return; el.textContent = 'The picture service is busy. Press Skip, or add a free Pollinations key in Settings.'; resolve(false); };
+      img.onerror = () => { if (el.dataset.token !== token) return; el.textContent = 'The picture service is busy. Press "Picture doesn\'t match / broken" to try a new one (no penalty), or add a free Pollinations key in Settings.'; resolve(false); };
       img.src = url;
     } catch (e) { if (el.dataset.token === token) el.textContent = 'Picture failed: ' + e.message; resolve(false); }
   });
