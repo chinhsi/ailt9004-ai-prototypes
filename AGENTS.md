@@ -8,6 +8,7 @@ Teaching prototypes for the HKU course AILT9004. Each numbered folder is one sel
 
 - `01-speaking-pal/` — `speaking-pal.html`, a single-file voice conversation partner. Runs entirely in the browser. **Nothing needs to be installed** for it.
 - `04-irony-mirror/` — `irony-mirror.html`, a single-file "two faces of a word" tool for teaching irony: text from an OpenAI-compatible API, pictures from Pollinations.ai (a free image service addressed by URL, no key). **Nothing needs to be installed** for it either.
+- `05-picture-talk/` — `picture-talk.html`, a single-file 看圖說話 game: the AI writes a hidden sentence, Pollinations draws it, the student describes it, the AI marks it. Same setup as prototype 4 (OpenRouter key; optional Pollinations key); voice input is optional and needs Chrome/Edge. Nothing to install.
 
 ## Environment facts you must respect
 
@@ -49,6 +50,12 @@ Teaching prototypes for the HKU course AILT9004. Each numbered folder is one sel
 - Do not add a server, a proxy, a paid image provider, or an API key for pictures unless the user explicitly has one. If the user has their own OpenAI-compatible `/images/generations` endpoint, it goes into Settings (*Image provider → OpenAI-compatible*), not into the code.
 - The behaviour of the tool lives in the **Teacher tab** (the system prompt, saved in localStorage) and in `DEFAULT_PROMPT` near the top of the script. Change text, not architecture.
 - To verify: paste the key, click the chip 孝順, wait: two captions and *The gap* should appear within ~10 s; pictures within ~60 s. Then open *Game*, press *Start*, click a picture, press *Reveal*.
+
+## Prototype 5 — Picture Talk: what to install
+
+- **Nothing.** Same keys and same picture rules as prototype 4. Each round makes two text requests (make the task, judge the answer), so 50 free requests a day ≈ 25 rounds.
+- The teacher edits the `<option>` texts for level and theme (they are the instruction sent to the model) and the two prompt functions `makePrompt()` / `judgePrompt()`. Keep the JSON field names.
+- To verify: paste the key, press *Start game*, wait for a picture (≤60 s), type a sentence, press *Submit*: a score, the target sentence and a tip should appear. Press *Skip* once to check it scores 0 and moves on.
 
 ## Later folders (when they appear)
 

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Picture Talk 看圖說話</title>
+<style>
+  :root { --ink:#1f2a24; --cream:#faf6ee; --green:#3E724F; --coral:#b3402f; --gold:#b8860b; --muted:#6b7570; --card:#ffffff; --line:#e2dccd; --sand:#f4f1e8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans", "PingFang HK", "Microsoft JhengHei", sans-serif; background:var(--cream); color:var(--ink); }
+  header { background:var(--green); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  header h1 { font-size:20px; margin:0; font-weight:600; }
+  header h1 small { font-weight:400; opacity:.8; font-size:13px; margin-left:8px; }
+  header button { background:rgba(255,255,255,.15); color:#fff; border:0; border-radius:6px; padding:6px 12px; cursor:pointer; font-weight:600; }
+  main { max-width:900px; margin:0 auto; padding:16px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+  .hidden { display:none !important; }
+  .row { display:grid; grid-template-columns: 170px 1fr; gap:8px 12px; align-items:center; margin-bottom:8px; }
+  .row label { font-size:14px; color:var(--muted); }
+  .row input, .row select { width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:6px; font-size:14px; font-family:inherit; }
+  .hint { font-size:12px; color:var(--muted); margin:4px 0 0; line-height:1.4; }
+  button.act { background:var(--green); color:#fff; border:0; border-radius:8px; padding:10px 16px; font-size:15px; cursor:pointer; }
+  button.act:disabled { opacity:.5; cursor:default; }
+  button.ghost { background:var(--sand); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:5px 10px; font-size:13px; cursor:pointer; }
+  #mic.listening { background:var(--coral); }
+  .bar { display:flex; gap:14px; align-items:center; flex-wrap:wrap; font-size:14px; }
+  .bar b { font-size:18px; color:var(--green); }
+  .streak { color:var(--gold); font-weight:700; }
+  .pic { position:relative; background:var(--sand); border:1px solid var(--line); border-radius:10px; aspect-ratio:3/2; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:14px; text-align:center; padding:12px; overflow:hidden; }
+  .pic img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  textarea.wide { width:100%; min-height:80px; padding:10px; border:1px solid var(--line); border-radius:8px; font-size:16px; font-family:inherit; }
+  .status { font-size:13px; color:var(--muted); margin-top:6px; min-height:18px; }
+  .status.err { color:var(--coral); }
+  .score-big { font-size:42px; font-weight:700; color:var(--green); line-height:1; }
+  .result { display:grid; grid-template-columns: 90px 1fr; gap:10px 16px; align-items:start; }
+  .result p { margin:4px 0; line-height:1.5; }
+  .tip { border-left:4px solid var(--gold); padding:6px 10px; background:#fffaf0; }
+  .target { font-size:18px; font-weight:600; }
+  .tag { display:inline-block; background:var(--sand); border-radius:10px; padding:2px 8px; font-size:12px; color:var(--muted); }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  td, th { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  @media (max-width:600px) { .row { grid-template-columns:1fr; } .result { grid-template-columns:1fr; } }
+  footer { text-align:center; font-size:12px; color:var(--muted); padding:16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Picture Talk <small>看圖說話 · describe what you see, beat the hidden sentence</small></h1>
+  <div><button id="toggleSettings">Settings</button></div>
+</header>
+<main>
+
+<section id="settings" class="panel hidden">
+  <div class="row"><label>Model preset</label>
+    <select id="preset">
+      <option value="https://openrouter.ai/api/v1|inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">OpenRouter (free models, works in Hong Kong)</option>
+      <option value="https://openrouter.ai/api/v1|qwen/qwen3-max, moonshotai/kimi-k2.6, deepseek/deepseek-v4">OpenRouter Premium (needs credit; better Chinese)</option>
+      <option value="custom">Custom (any OpenAI-compatible endpoint)</option>
+    </select></div>
+  <div class="row"><label>API key</label><input id="apiKey" type="password" placeholder="paste your key from openrouter.ai/keys"></div>
+  <div class="row"><label>Base URL</label><input id="baseUrl" value="https://openrouter.ai/api/v1"></div>
+  <div class="row"><label>Model(s)</label><input id="model" value="inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"></div>
+  <div class="row"><label>Pollinations key</label><input id="pollKey" type="password" placeholder="optional: pk_… from enter.pollinations.ai/keys (free) — faster, cleaner pictures"></div>
+  <div class="row"><label>Picture model</label>
+    <select id="pollModel"><option value="zimage">zimage (free tier)</option><option value="flux">flux (free tier)</option><option value="klein">flux-2-klein (free tier)</option><option value="openai/gpt-image-2.5-flare">gpt-image-2.5-flare (paid pollen)</option></select></div>
+  <div class="row"><label>Picture style</label><input id="style" value="clear, simple illustration for a language textbook, bright daylight, one main action easy to describe, Hong Kong setting, no text or letters"></div>
+  <p class="hint">Keys stay in this browser (localStorage). Free OpenRouter models: 50 requests a day; each round uses two (make the sentence, judge your description). Without a Pollinations key the page uses the anonymous picture service (one picture at a time per network, small watermark).</p>
+</section>
+
+<section class="panel" id="setup">
+  <div class="row"><label>Language</label>
+    <select id="lang">
+      <option value="Traditional Chinese written standard Chinese 書面語 as in Hong Kong textbooks — NOT Cantonese colloquial: never use 嘅 係 喺 緊 嗰 冇 咗 啲 佢 乜 點解 邊度; use 的 是 在 正在 那 沒有 了 些 他/她 什麼 為什麼 哪裏">Chinese 中文（書面語）</option>
+      <option value="Cantonese colloquial written Chinese 粵語口語 (Hong Kong), using 嘅 係 喺 緊 佢 naturally">Cantonese 粵語（口語）</option>
+      <option value="English">English</option>
+    </select></div>
+  <div class="row"><label>Level</label>
+    <select id="level">
+      <option>Primary 3–4: one simple sentence (who + is doing what + where)</option>
+      <option selected>Primary 5–6: two sentences (action + a detail or feeling)</option>
+      <option>Secondary 1–3: three sentences with time, place, cause or result</option>
+      <option>Secondary 4–6: a short paragraph with description and inference</option>
+    </select></div>
+  <div class="row"><label>Theme</label>
+    <select id="theme">
+      <option>everyday life in Hong Kong (MTR, wet market, cha chaan teng, housing estate, school)</option>
+      <option>school day and classroom</option>
+      <option>weather and seasons</option>
+      <option>sports and hobbies</option>
+      <option>family and festivals (Mid-Autumn, Lunar New Year)</option>
+      <option>animals and nature (country park, beach)</option>
+    </select></div>
+  <div class="row"><label>Rounds</label><select id="rounds"><option>3</option><option selected>5</option><option>8</option></select></div>
+  <div class="bar" style="margin-top:6px"><button class="act" id="start">Start game</button><span class="hint" id="best"></span></div>
+  <div class="status" id="status"></div>
+</section>
+
+<section id="round" class="hidden">
+  <div class="panel bar">
+    <span>Round <b id="rNo">1</b>/<span id="rTotal">5</span></span>
+    <span>Score <b id="score">0</b></span>
+    <span class="streak" id="streak"></span>
+    <span class="tag" id="rTheme"></span>
+  </div>
+  <div class="panel">
+    <div class="pic" id="pic">picture</div>
+    <p style="margin:10px 0 6px; font-size:15px">Describe the picture in <b id="langName"></b>. The AI is hiding a target sentence about it. The closer you get, the more points.</p>
+    <textarea class="wide" id="answer" placeholder="Type here, or press Talk and speak…"></textarea>
+    <div class="bar" style="margin-top:8px">
+      <button class="act" id="submit">Submit</button>
+      <button class="ghost" id="mic">Talk</button>
+      <button class="ghost" id="skip">Skip (0 points)</button>
+      <span class="status" id="rstatus"></span>
+    </div>
+  </div>
+  <div class="panel hidden" id="feedback">
+    <div class="result">
+      <div class="score-big" id="pts"></div>
+      <div>
+        <p><b>Target sentence 目標句：</b> <span class="target" id="target"></span></p>
+        <p><b>What you got 說中了：</b> <span id="got"></span></p>
+        <p><b>What you missed 漏了：</b> <span id="missed"></span></p>
+        <p class="tip" id="tip"></p>
+        <p><b>A better version 更好的說法：</b> <span id="better"></span></p>
+      </div>
+    </div>
+    <div class="bar" style="margin-top:10px"><button class="act" id="next">Next picture</button></div>
+  </div>
+</section>
+
+<section id="end" class="panel hidden"></section>
+
+<section class="panel">
+  <details><summary style="cursor:pointer; font-weight:600">Teacher notes · how this game is built</summary>
+    <ol style="line-height:1.6; padding-left:20px; margin:8px 0">
+      <li><b>Make a sentence</b>: one AI call writes a target sentence at the chosen level and theme, plus an English picture prompt that shows exactly that sentence and nothing that contradicts it.</li>
+      <li><b>Draw it</b>: the picture prompt goes to an image service as a URL. The student only sees the picture.</li>
+      <li><b>Judge</b>: a second AI call compares the student's description with the hidden sentence: points 0–10 for content (who / action / where / details), what was hit, what was missed, one language tip, one better version. Points are for content, not grammar: the tip handles grammar.</li>
+      <li><b>Why it is a game</b>: a hidden goal, uncertainty, immediate feedback, a streak bonus (+2 for three rounds of 7+), and a best score kept on this computer. Remove any of these and it becomes a worksheet.</li>
+      <li><b>Where the teacher is</b>: the level text and the theme list at the top of the file, and the two prompts (<code>makePrompt</code>, <code>judgePrompt</code>) near the bottom. Change text, not architecture. Check three rounds yourself before class: does the picture actually show the sentence?</li>
+    </ol>
+  </details>
+</section>
+
+</main>
+<footer>Picture Talk · AILT9004 prototype 5 · text: any OpenAI-compatible API · pictures: Pollinations.ai</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const store = (k, v) => { try { localStorage.setItem('pt_' + k, v); } catch (e) {} };
+const load = (k, d) => { try { return localStorage.getItem('pt_' + k) ?? d; } catch (e) { return d; } };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+['apiKey', 'baseUrl', 'model', 'pollKey', 'pollModel', 'style', 'lang', 'level', 'theme', 'rounds'].forEach(id => {
+  const v = load(id, null); if (v !== null) $(id).value = v;
+  $(id).addEventListener('change', () => store(id, $(id).value));
+});
+$('preset').addEventListener('change', () => { if ($('preset').value === 'custom') return; const [b, m] = $('preset').value.split('|'); $('baseUrl').value = b; $('model').value = m; store('baseUrl', b); store('model', m); });
+$('toggleSettings').addEventListener('click', () => $('settings').classList.toggle('hidden'));
+if (!$('apiKey').value) $('settings').classList.remove('hidden');
+$('best').textContent = load('best', null) ? 'Best on this computer: ' + load('best') : '';
+
+// ---------- AI call: any OpenAI-compatible endpoint ----------
+const unpaid = new Set();
+async function callAI(system, user, statusEl) {
+  const key = $('apiKey').value.trim();
+  if (!key) throw new Error('Please paste your API key in Settings (free key: openrouter.ai/keys).');
+  const base = $('baseUrl').value.trim().replace(/\/+$/, '');
+  const models = $('model').value.split(',').map(m => m.trim()).filter(Boolean);
+  let lastErr = null;
+  for (const model of models) {
+    if (unpaid.has(model)) continue;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (statusEl) statusEl.textContent = 'Thinking with ' + model + '…';
+      let r, data;
+      try {
+        r = await fetch(base + '/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key, 'X-Title': 'Picture Talk (AILT9004)' },
+          body: JSON.stringify({ model, temperature: 0.8, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }) });
+        data = await r.json().catch(() => ({}));
+      } catch (e) { lastErr = new Error('Network error: ' + e.message); break; }
+      if (r.ok && data.choices && data.choices[0]) {
+        const c = data.choices[0].message.content; const text = Array.isArray(c) ? c.map(p => p.text || '').join('') : (c || '');
+        const o = parseJSON(text); if (o) return o;
+        lastErr = new Error('The model did not return valid JSON; trying again.'); continue;
+      }
+      lastErr = new Error((data.error && (data.error.message || data.error)) ? (data.error.message || JSON.stringify(data.error)) : 'HTTP ' + r.status);
+      if (r.status === 402 || r.status === 403 || /credit|insufficient|payment|region|billing/i.test(lastErr.message)) { unpaid.add(model); break; }
+      if (![429, 502, 503, 404].includes(r.status)) throw lastErr;
+      await new Promise(res => setTimeout(res, 1500));
+    }
+  }
+  throw lastErr || new Error('No model available.');
+}
+function parseJSON(text) {
+  const t = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a < 0 || b < 0) return null;
+  try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; }
+}
+
+// ---------- pictures (Pollinations: the picture is a URL) ----------
+let lastPoll = 0;
+async function pictureURL(prompt, seed) {
+  const full = $('style').value + '. ' + prompt;
+  const key = $('pollKey').value.trim();
+  if (key) {
+    const url = 'https://gen.pollinations.ai/image/' + encodeURIComponent(full) + '?width=768&height=512&model=' + encodeURIComponent($('pollModel').value) + '&seed=' + seed + '&safe=true';
+    const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + key } });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); }
+    return URL.createObjectURL(await r.blob());
+  }
+  const wait = Math.max(0, lastPoll + 15500 - Date.now()); lastPoll = Date.now() + wait;
+  await new Promise(r => setTimeout(r, wait));
+  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(full) + '?width=768&height=512&nologo=true&model=flux&seed=' + seed;
+}
+function showPicture(el, prompt, seed) {
+  return new Promise(async resolve => {
+    el.textContent = 'Drawing… (15–45 s)';
+    try {
+      const url = await pictureURL(prompt, seed);
+      const img = new Image(); img.alt = 'picture to describe';
+      img.onload = () => { el.textContent = ''; el.appendChild(img); resolve(true); };
+      img.onerror = () => { el.textContent = 'The picture service is busy. Press Skip, or add a free Pollinations key in Settings.'; resolve(false); };
+      img.src = url;
+    } catch (e) { el.textContent = 'Picture failed: ' + e.message; resolve(false); }
+  });
+}
+
+// ---------- the two prompts (the teacher's part) ----------
+function makePrompt() {
+  return `You write picture-description tasks (看圖說話) for a language class in Hong Kong.
+Language of the target sentence: ${$('lang').value}. Level: ${$('level').value}. Theme: ${$('theme').value}.
+Return a JSON object only:
+{"target": the hidden target sentence(s) at that level, concrete and visual (who, action, where, one detail), everyday vocabulary, no names of real people;
+ "keyPoints": [3-5 short content points a learner should mention, in the same language],
+ "imagePrompt": an English prompt for an image generator that shows EXACTLY the target: one main character or two, one clear action, the place, the detail; nothing that contradicts the target; no text in the image}
+No code fences, no commentary.`;
+}
+function judgePrompt() {
+  return `You are a kind, precise language teacher in Hong Kong marking a picture-description task (看圖說話).
+The learner saw a picture and wrote a description. You know the hidden target sentence and its key points. Language: ${$('lang').value}. Level: ${$('level').value}.
+Score CONTENT only, 0-10: did they mention the who / action / place / details in the key points? Do not deduct for grammar; grammar goes in the tip. If the description is empty or in another language, score 0-2.
+Return a JSON object only:
+{"points": integer 0-10, "got": one sentence saying what they captured, "missed": one sentence saying what key points they left out (or "nothing" if all), "tip": ONE short encouraging language tip (max 25 words) about their grammar/wording, quoting the better form, "better": the learner's own description rewritten at their level, correct and natural (1-3 sentences)}
+No code fences, no commentary.`;
+}
+
+// ---------- game loop ----------
+let G = null, recognition = null, listening = false;
+const langName = () => ({ 'English': 'English' }[$('lang').value] || ($('lang').value.includes('Cantonese') ? 'Cantonese 粵語' : 'Chinese 中文'));
+$('start').addEventListener('click', async () => {
+  G = { i: 0, n: +$('rounds').value, score: 0, streak: 0, log: [] };
+  $('rTotal').textContent = G.n; $('score').textContent = 0; $('streak').textContent = '';
+  $('setup').classList.add('hidden'); $('end').classList.add('hidden'); $('round').classList.remove('hidden');
+  $('rTheme').textContent = $('theme').value.split(' (')[0]; $('langName').textContent = langName();
+  await newRound();
+});
+async function newRound() {
+  $('rNo').textContent = G.i + 1; $('feedback').classList.add('hidden'); $('answer').value = ''; $('answer').disabled = false; $('submit').disabled = false; $('skip').disabled = false;
+  $('rstatus').className = 'status';
+  try { G.cur = await callAI(makePrompt(), 'Make one task. Seed: ' + Math.random().toString(36).slice(2, 8), $('rstatus')); }
+  catch (e) { $('rstatus').className = 'status err'; $('rstatus').textContent = e.message; return; }
+  $('rstatus').textContent = '';
+  showPicture($('pic'), G.cur.imagePrompt, Math.floor(Math.random() * 1e6));
+  $('answer').focus();
+}
+$('submit').addEventListener('click', () => judge(false));
+$('skip').addEventListener('click', () => judge(true));
+$('answer').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) judge(false); });
+async function judge(skipped) {
+  if (!G || !G.cur) return;
+  const text = skipped ? '' : $('answer').value.trim();
+  if (!skipped && !text) { $('rstatus').textContent = 'Write or say something first.'; return; }
+  $('submit').disabled = true; $('skip').disabled = true; $('answer').disabled = true;
+  let res = { points: 0, got: '—', missed: '—', tip: '', better: '' };
+  if (!skipped) {
+    try { res = await callAI(judgePrompt(), 'Hidden target: ' + G.cur.target + '\nKey points: ' + JSON.stringify(G.cur.keyPoints) + '\nLearner wrote: ' + text, $('rstatus')); }
+    catch (e) { $('rstatus').className = 'status err'; $('rstatus').textContent = e.message; $('submit').disabled = false; $('answer').disabled = false; return; }
+  }
+  $('rstatus').textContent = '';
+  let pts = Math.max(0, Math.min(10, parseInt(res.points) || 0));
+  G.streak = pts >= 7 ? G.streak + 1 : 0;
+  let bonus = 0; if (G.streak && G.streak % 3 === 0) { bonus = 2; }
+  G.score += pts + bonus;
+  G.log.push({ target: G.cur.target, text, pts });
+  $('score').textContent = G.score; $('streak').textContent = G.streak >= 2 ? 'streak ' + G.streak + (bonus ? ' +2 bonus' : '') : '';
+  $('pts').textContent = pts + (bonus ? '+' + bonus : '');
+  $('target').textContent = G.cur.target; $('got').textContent = res.got || '—'; $('missed').textContent = res.missed || '—';
+  $('tip').textContent = res.tip ? 'Tip: ' + res.tip : ''; $('tip').classList.toggle('hidden', !res.tip);
+  $('better').textContent = res.better || '—';
+  $('feedback').classList.remove('hidden'); $('feedback').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+$('next').addEventListener('click', async () => {
+  G.i++;
+  if (G.i >= G.n) return endGame();
+  await newRound();
+});
+function endGame() {
+  $('round').classList.add('hidden');
+  const max = G.n * 10; const best = Math.max(G.score, +load('best', 0)); store('best', best);
+  $('end').innerHTML = `<h3 style="margin:0 0 6px">Finished: ${G.score} / ${max}</h3><p>Best on this computer: ${best}.</p>
+  <table><tr><th>#</th><th>Target</th><th>You wrote</th><th>Points</th></tr>${G.log.map((l, i) => `<tr><td>${i + 1}</td><td>${esc(l.target)}</td><td>${esc(l.text) || '<i>skipped</i>'}</td><td>${l.pts}</td></tr>`).join('')}</table>
+  <div class="bar" style="margin-top:10px"><button class="act" id="again">Play again</button><button class="ghost" id="copyLog">Copy my sentences</button></div>`;
+  $('end').classList.remove('hidden');
+  $('again').addEventListener('click', () => { $('end').classList.add('hidden'); $('setup').classList.remove('hidden'); $('best').textContent = 'Best on this computer: ' + best; });
+  $('copyLog').addEventListener('click', () => navigator.clipboard.writeText(G.log.map((l, i) => `${i + 1}. ${l.text}\n   → ${l.target} (${l.pts})`).join('\n')));
+}
+
+// ---------- optional voice input (Chrome/Edge) ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SR) $('mic').title = 'Voice input needs Chrome or Edge';
+$('mic').addEventListener('click', () => {
+  if (!SR) { $('rstatus').textContent = 'Voice input needs Chrome or Edge; type instead.'; return; }
+  if (listening) { recognition.stop(); return; }
+  recognition = new SR(); recognition.lang = $('lang').value === 'English' ? 'en-US' : ($('lang').value.includes('Cantonese') ? 'yue-Hant-HK' : 'zh-HK'); recognition.interimResults = true; recognition.continuous = true;
+  let finalText = $('answer').value;
+  recognition.onresult = e => { let interim = ''; for (let i = e.resultIndex; i < e.results.length; i++) { if (e.results[i].isFinal) finalText += e.results[i][0].transcript; else interim += e.results[i][0].transcript; } $('answer').value = finalText + interim; };
+  recognition.onend = () => { listening = false; $('mic').classList.remove('listening'); $('mic').textContent = 'Talk'; };
+  recognition.onerror = () => { listening = false; $('mic').classList.remove('listening'); $('mic').textContent = 'Talk'; };
+  recognition.start(); listening = true; $('mic').classList.add('listening'); $('mic').textContent = 'Stop';
+});
+</script>
+</body>
+</html>
