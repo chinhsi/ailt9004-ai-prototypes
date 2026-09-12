@@ -9,6 +9,11 @@ Everything here works from **Hong Kong without a VPN** and uses **free** service
 | 1 | [**Speaking Pal**](01-speaking-pal/) | Voice conversation partner (English / Putonghua / Cantonese) with gentle tips | One HTML file + browser speech + OpenRouter free models | ✅ available |
 | 2 | Essay Grader | Rubric-based scoring and feedback inside Google Sheets | Google Sheets + Apps Script + OpenRouter | coming |
 | 3 | Lesson Pack Agent | One command turns any text into a 5-file lesson pack | OpenCode CLI + two plain-text rule files | coming |
+| 4 | [**Irony Mirror 反諷鏡**](04-irony-mirror/) | One word, two faces: sincere vs ironic, with captions, pictures, a discussion scaffold and a *Spot the irony* game | One HTML file + OpenRouter free models + a free image URL service (Pollinations) | ✅ available |
+
+## Try Irony Mirror now (no download)
+
+**Open <https://chinhsi.github.io/ailt9004-ai-prototypes/04-irony-mirror/irony-mirror.html>**, paste your OpenRouter key in Settings, click a word. Pictures come from a free public image service and take 15–45 s each. Details, limits and classroom use: [04-irony-mirror/README.md](04-irony-mirror/README.md).
 
 ## Try Speaking Pal now (no download)
 

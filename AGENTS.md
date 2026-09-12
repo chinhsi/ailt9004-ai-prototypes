@@ -7,6 +7,7 @@ You are helping a **language teacher or a teacher-education student with no prog
 Teaching prototypes for the HKU course AILT9004. Each numbered folder is one self-contained prototype with its own `README.md`. Currently:
 
 - `01-speaking-pal/` — `speaking-pal.html`, a single-file voice conversation partner. Runs entirely in the browser. **Nothing needs to be installed** for it.
+- `04-irony-mirror/` — `irony-mirror.html`, a single-file "two faces of a word" tool for teaching irony: text from an OpenAI-compatible API, pictures from Pollinations.ai (a free image service addressed by URL, no key). **Nothing needs to be installed** for it either.
 
 ## Environment facts you must respect
 
@@ -40,6 +41,14 @@ Teaching prototypes for the HKU course AILT9004. Each numbered folder is one sel
 - Never write an API key into any file in this repository, into a commit, or into an example. Keys go only into the page's Settings box (browser storage) or the user's own private notes.
 - Never commit `output/`, logs, or anything containing personal data. Sample texts must be fictional or original.
 - If you find a key in the working tree, tell the user to revoke it at the provider's website and remove it before committing.
+
+## Prototype 4 — Irony Mirror: what to install
+
+- **Nothing.** Same OpenRouter key as Speaking Pal, pasted into the page's Settings. Any modern browser works (no speech features needed).
+- Pictures: the page builds a URL like `https://image.pollinations.ai/prompt/<encoded prompt>?width=768&height=512&seed=N` and sets it as an `<img>` source. Anonymous use is rate-limited to **one queued picture per IP address** (about one every 15 s), so the page spaces its two requests 15 s apart. In a classroom sharing one network address, pictures will queue behind each other — that is expected; tell the user to use *Copy prompt* with another image tool, or set *Image provider → No pictures* (the SVG card still works).
+- Do not add a server, a proxy, a paid image provider, or an API key for pictures unless the user explicitly has one. If the user has their own OpenAI-compatible `/images/generations` endpoint, it goes into Settings (*Image provider → OpenAI-compatible*), not into the code.
+- The behaviour of the tool lives in the **Teacher tab** (the system prompt, saved in localStorage) and in `DEFAULT_PROMPT` near the top of the script. Change text, not architecture.
+- To verify: paste the key, click the chip 孝順, wait: two captions and *The gap* should appear within ~10 s; pictures within ~60 s. Then open *Game*, press *Start*, click a picture, press *Reveal*.
 
 ## Later folders (when they appear)
 
