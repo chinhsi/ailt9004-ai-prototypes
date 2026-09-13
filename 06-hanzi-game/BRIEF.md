@@ -1,4 +1,4 @@
-> **Teacher's brief as it stands in the private source repository on 13 Sep 2026** (the file is called `AGENTS.md` there: it is what the coding agent reads first). Kept in the original Chinese; the operational lines about servers and channels are part of the real document and are left in so you can see what a working brief looks like. Names of internal tools (Hermes, Discord, VPS) are the teacher's own setup and not needed to reproduce the game.
+> **The teacher's note, exactly as it stands in the private source repository on 13 Sep 2026** (there it is called `AGENTS.md`, the file a coding assistant reads first). Kept in the original Chinese. It has grown during the day: the top is the original brief, the bottom is the running progress log the assistant keeps. Lines about servers, ports and chat channels are part of the real document; they are the teacher's own setup and are not needed to reproduce the game.
 
 # Hanzi Game — 7 歲小孩認字遊戲
 
@@ -9,7 +9,7 @@ PI（Dr. Lin）要給 7 歲小孩做一個學習認字（中文漢字）的遊�
 
 - **純前端網頁遊戲**：Vite + TypeScript，畫面用 Phaser 3 或純 DOM/CSS（先問 PI 偏好，沒回覆就用 Phaser，和 td-game 經驗共用）。無後端；進度存 localStorage。
 - **手機/平板優先**，大按鈕、大字、可觸控；桌機也要能玩。
-- 中文字用系統字型 + 注音/拼音可切換（PI 決定）；語音朗讀先用瀏覽器 Web Speech API（`speechSynthesis`，zh-CN，簡體），不接付費 TTS。
+- 中文字用系統字型 + 注音/拼音可切換（PI 決定）；語音：**預先合成音檔**（`tools/gen-audio.py`，edge-tts 免費微軟神經語音 zh-CN-XiaoxiaoNeural，輸出 `public/audio/<sha1>.mp3` + manifest.json；venv `.venv-tts`）。新增字/句子/部件名後要重跑一次（已存在的會跳過）。瀏覽器 speechSynthesis 只是備援。PI 09-13 反映 iOS 內建語音太差且會亂念，所以改這條路。
 - 素材先用簡單幾何圖形或免費 emoji/圖示，**玩法與學習效果優先於美術**。
 
 ## 設計原則（7 歲兒童）
@@ -57,8 +57,11 @@ PI（Dr. Lin）要給 7 歲小孩做一個學習認字（中文漢字）的遊�
 - [x] 專案 scaffold（Vite + TS + 純 DOM，2026-09-13，Claude Code）；`npm test` 是 vitest+jsdom 煙霧測試
 - [x] 資料：`data/chars.json`（672 字，拼音 + IDS 拆解 503 字，由 `npm run data` 重建）、`data/sentences.json`（66 句自編，非原文）
 - [x] 第一波四題型 1/4/8/10 + Leitner 進度（localStorage）+ 結束畫面 + 家長頁
+- [x] 題型 3 填空（`src/games/fill.ts`）：詞表 `data/words.json` 570 詞（2-4 字，只用字表字，g/u/l=解鎖課；來源 `tools/words-src.txt`，改完重跑產生腳本段落在 git log）；語氣詞（咦呢啊唉哇呀）無詞不出此題
 - [x] 題型 5 找同部件（`src/games/family.ts`，含字族如青→请睛蜻情；部件名表 NAMES；跳過 一丿十八人大 這類無意義部件）。已知限制：IDS 非二元拆解的字（ids=null）若含該部件不會被當正解，可能出現在負項
 - [x] dev server 以 `systemctl --user` 的 `hanzi-game.service` 常駐 8091
 - [x] Codex（gpt-5.6-astra）review 14 條，修 13 條（09-13）：家族改用遞迴部件 `comps`、部件不出後面課生詞、聽音找字/拼字/排句子加鎖、排句子只在有含目標字句子時出、翻翻樂拼音不重複+配錯記錯、todaySet 補滿 10、TTS 沒在講就直接念保 iOS 手勢、settings/progress 驗證。保留：干擾部件可為非生詞零件（如 艮），因和 氵 同性質
+- [x] 音訊層（`src/tts.ts`）已踩過的坑，改動前必讀：WebKit 自然播完 onended 可能不觸發（用音長保底）；Firefox resume() promise 可能不回（400ms 逾時走 <audio>）；音檔按需抓太慢（SW 永久快取 + 首頁預抓本課全部）；看門狗 3 秒未起播自我修復。驗證工具：`node tools/browser-probe.mjs <chromium|webkit|firefox>`（需 dev server :8091）、`node tools/sw-probe.mjs`
+- [x] Codex review #2（v0.13→v0.14，預設 model sol）：10 條全修。音訊層現在的契約：`stop()` 是唯一作廢點（gen++）；pump 有 token，recover() 換掉現任；<audio> 的 play() 拒絕不算起播（看門狗會抓）；`say()/sayAll()` 回 promise，遊戲用 `thenDone()` 等念完再進下一題（上限 5-8 秒）；音檔檔名含 voice/rate/ENC 版本（改合成參數要升 `ENC`），SW 快取名 `hanzi-audio-v2`（改音檔內容要升）；`tests/tts.test.ts` 6 個狀態機測試
 - [ ] PI 試玩回饋（手機實測 TTS 是否出聲：iOS Safari 需先點過畫面）
 - [ ] 待決：注音要不要加、Phaser 化

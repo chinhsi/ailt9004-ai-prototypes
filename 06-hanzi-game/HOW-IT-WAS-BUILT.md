@@ -1,33 +1,44 @@
-# How 认字乐园 was built: one evening, one brief, ten commits
+# How 认字乐园 was built: one day, one note, thirty small steps
 
-*Teacher's notes for AILT9004 Week 5 (and MEDD8934 Week 3, where the Leitner box is the example of personalisation "by data").*
+*Teacher's notes for AILT9004 Week 5. Written for readers who do not code.*
 
-## Timeline (13 Sep 2026, Hong Kong time)
+## First, four words you will meet
 
-| Time | Commit | What happened |
-|---|---|---|
-| 00:23 | init: hanzi game brief | The teacher's brief (`BRIEF.md`) is the first and only thing in the repository. |
-| 00:28, 00:34 | data: 马立平 grade 2, grade 1 character lists | The agent extracts the character lists from the publisher's PDFs into JSON, grouped by unit and lesson. The brief is updated: "character list decided". |
-| 00:41 | AGENTS.md: game-type roadmap | Eleven game types listed; the teacher picks four that need no new data (1 listen-and-find, 4 build-from-components, 8 memory pairs, 10 sentence order). |
-| 00:46 | MVP: four game types + Leitner + parent page + tests | First playable version: 10 rounds, stars, progress, parent page, vitest smoke tests. |
-| 00:57 | The progressive rule as a hard constraint | "Only learned characters may appear" becomes one function all games draw from, a data checker, and a test. TTS fix: single characters were being cut off. |
-| 01:03 | Game type 5: same-component hunt | Added because the component data was already there (character families such as 青 → 请 睛 蜻 情). |
-| 01:23 | Codex review: 14 findings, 13 fixed, 7 new tests | A second agent reviews the code; fixes include recursive component matching, input locks so double taps do not count twice, sentence-game threshold, iOS speech gesture handling, saved-data validation. |
-| 01:25–01:26 | Pages deployment | Build output pushed to a public repository; source stays private because of the PDFs. Live at chinhsi.github.io/hanzi-game-pages. |
+- **Repository (repo):** the folder where a program and its history live, usually on GitHub.
+- **Commit:** a saved snapshot of that folder with a one-line note saying what changed. Thirty commits = thirty saved steps.
+- **Test:** a small automatic check that runs every time the program changes and shouts if something that used to work is now broken.
+- **Review:** a second assistant reads the whole program cold and lists what could go wrong.
 
-About one hour from brief to a reviewed, deployed game. The teacher's contribution: the brief, two decisions (character list; which four game types first), and the rule.
+## The day (13 Sep 2026, Hong Kong time)
+
+| Time | What happened |
+|---|---|
+| 00:23 | The teacher's one-page note is saved as the first commit. Nothing else exists yet. |
+| 00:28–00:34 | The assistant reads the textbook's character lists (PDFs) and turns them into a list the game can use, lesson by lesson. |
+| 00:41 | Eleven possible question types are listed. The teacher picks four that need no extra material and says the rest can wait. |
+| 00:46 | **First playable game**: four question types, the five-box memory system, stars, a parent page, and a first set of tests. Twenty-three minutes after the note. |
+| 00:57 | The teacher's strict rule ("only characters already taught may appear") becomes an automatic check plus a test. |
+| 01:03 | A fifth question type (part hunt) is added because the material for it was already there. |
+| 01:23 | **First review**: 14 problems found, 13 fixed — for example, a fast double tap used to count as two answers. Seven new tests. |
+| 01:25 | The game goes online. |
+| 01:30–02:02 | The teacher tries it on an iPhone: the built-in voice is poor and sometimes reads the wrong thing. Decision: record every character, word and sentence in advance with a free, natural Microsoft voice (829 clips, later 1,400) and keep the phone's voice only as a fallback. |
+| 03:49–06:38 | The long stretch: making sound play reliably on every phone. Each browser breaks in a different way (iPhone needs a tap before any sound; one browser never says "finished"; another never says "ready"). Solutions: play through a more reliable audio route, store the clips on the phone after the first visit, and a "watchdog" that notices within three seconds when a sound did not start and tries another way. A script listens to all 829 clips with a speech recogniser to make sure none is silent. |
+| 08:59 | A sixth question type: fill the missing character in a word, using a new list of 570 words that only use taught characters. |
+| 09:14 | **Second review**: 10 problems, all fixed, six more tests — mostly about sound: the game now waits for the voice to finish before moving on, and there is one clear "stop everything" point. |
+| 09:16 | Version 0.14 online. |
 
 ## What to point at in class
 
-- **The brief is the product.** Compare `BRIEF.md` with the running game: nearly every sentence is visible somewhere. The sentences that became *tests* were followed most exactly.
-- **A pedagogical rule can be a unit test.** "Never show a character the child has not learned" is a teaching decision; in the code it is `learned()` + `check-data.mjs` + one test. Ask students: what rule in *your* teaching could be written this way?
-- **The learner model is five boxes.** Leitner is decades old and needs no AI at all. The AI here wrote the game; the adaptivity is plain arithmetic on the child's history. (MEDD8934 W3: personalisation by data can be this simple — and this transparent: the parent page *is* the learner model.)
-- **Two agents, not one.** The build agent and the review agent found different things. The review caught double-tap scoring and an iOS audio rule the builder could not know without a phone.
-- **What is still untested:** whether a seven-year-old plays it twice. Everything above is engineering; that is the research.
+- **The note is the product.** Put `BRIEF.md` next to the running game: almost every sentence is visible somewhere. The sentences that became automatic checks were followed most exactly.
+- **A teaching rule can be a test.** "Never show a character the child has not learned" is a pedagogical decision. In the game it is one line of logic plus one automatic check. Ask: what rule in *your* teaching could be written that clearly?
+- **The "adaptive" part is five boxes.** No AI decides what the child sees next; a forty-year-old flashcard method does, and the parent can see it. Good question for MEDD8934 Week 3: when does personalisation *need* to be opaque?
+- **Sound was the hard part, not the game.** Twenty-three minutes to a playable game; seven hours to make a phone reliably say 池. The expensive part of school software is rarely the clever part.
+- **Two assistants beat one.** The reviewer caught the double-tap bug and an iPhone sound rule the builder could not know without a phone in hand.
+- **Still untested:** whether a seven-year-old plays it twice. Everything above is engineering; that is the research.
 
 ## Honest list
 
-- Not yet played by the child at the time of writing; TTS on iOS Safari unverified in the wild.
-- 25 % of characters lack a clean component split and skip two game types.
-- Sentences are home-made and only machine-checked for vocabulary.
-- Simplified characters and pinyin only, because that is the child's curriculum; a Hong Kong class would need traditional characters and a different list — the architecture does not care, the data does.
+- Not yet played by the child at the time of writing.
+- 25 % of characters have no clean two-part split and skip two question types.
+- Sentences and words are home-made and only machine-checked for vocabulary.
+- Simplified characters and pinyin only; the code does not care, the list does.
