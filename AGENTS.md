@@ -57,6 +57,10 @@ Teaching prototypes for the HKU course AILT9004. Each numbered folder is one sel
 - The teacher edits the `<option>` texts for level and theme (they are the instruction sent to the model) and the two prompt functions `makePrompt()` / `judgePrompt()`. Keep the JSON field names.
 - To verify: paste the key, press *Start game*, wait for a picture (≤60 s), type a sentence, press *Submit*: a score, the target sentence and a tip should appear. Press *Skip* once to check it scores 0 and moves on.
 
+## Prototype 6 — Hanzi Game: nothing to install here
+
+- `06-hanzi-game/` holds only documents (README, the teacher's brief, the build story, a starter prompt, screenshots). The game itself runs at <https://chinhsi.github.io/hanzi-game-pages/>; its source is in a private repository. Do not try to rebuild or clone it from this folder. If the user wants their own game, use `06-hanzi-game/BUILD-IT-YOURSELF.md` as the brief in a **new, empty** folder with OpenCode; it needs Node.js (for Vite) — that is the one prototype where installing Node is expected.
+
 ## Later folders (when they appear)
 
 - `02-essay-grader/` — a Google Apps Script file; nothing to install locally. The user pastes `Code.gs` into *Extensions → Apps Script* in a Google Sheet and sets the OpenRouter key through the sheet's menu.
