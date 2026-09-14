@@ -12,6 +12,7 @@ Everything here works from **Hong Kong without a VPN** and uses **free** service
 | 4 | [**Irony Mirror 反諷鏡**](04-irony-mirror/) | One word, two faces: sincere vs ironic, with captions, pictures, a discussion scaffold and a *Spot the irony* game | One HTML file + OpenRouter free models + a free image URL service (Pollinations) | ✅ available |
 | 5 | [**Picture Talk 看圖說話**](05-picture-talk/) | A game: the AI hides a sentence, draws it, you describe the picture, the AI marks content and gives one tip; streaks and best score | One HTML file + OpenRouter free models + Pollinations + browser speech (optional) | ✅ available |
 | 6 | [**认字乐园 Hanzi Game**](06-hanzi-game/) | Phone-first Chinese character game: six question types, spaced repetition (five boxes), real recorded voice, parent page — built by a coding assistant from a one-page teacher note | Vite + TypeScript + tests (source private; brief, build story and live game here) | ✅ [play](https://chinhsi.github.io/hanzi-game-pages/) |
+| 7 | [**字靈冒險 Hanzi Quest**](07-hanzi-quest/) | Chinese word battles: rotating listening/pinyin questions, whole-word audio, skills, monster rewards and character levels; browser-local progress | Static HTML/CSS/JavaScript + packaged audio; no key or live AI service | ✅ [play](https://chinhsi.github.io/ailt9004-ai-prototypes/07-hanzi-quest/) |
 
 ## Try Irony Mirror now (no download)
 

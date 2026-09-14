@@ -65,3 +65,7 @@ Teaching prototypes for the HKU course AILT9004. Each numbered folder is one sel
 
 - `02-essay-grader/` — a Google Apps Script file; nothing to install locally. The user pastes `Code.gs` into *Extensions → Apps Script* in a Google Sheet and sets the OpenRouter key through the sheet's menu.
 - `03-lesson-pack-agent/` — needs **OpenCode** (`curl -fsSL https://opencode.ai/install | bash` on Mac/Linux, `irm https://opencode.ai/install.ps1 | iex` on Windows PowerShell) and its free Zen models (`opencode auth login` → *OpenCode Zen*, key from <https://opencode.ai/auth>). It reads this repository's `AGENTS.md` and the folder's own `AGENTS.md`; run `/lesson-pack samples/<file>.txt` inside the folder.
+
+## Prototype 7 — Hanzi Quest: nothing to install
+
+`07-hanzi-quest/` is a complete static game with local scripts, stylesheet, illustrations and prerecorded whole-word audio. Open its `index.html` or the GitHub Pages folder URL. No API key, account, microphone, live AI provider or build step. Its own `AGENTS.md` specifies privacy and gameplay constraints. Keep this folder self-contained and do not copy private hosting settings or development history into it.
