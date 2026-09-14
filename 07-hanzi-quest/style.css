@@ -4,3 +4,73 @@
 .answer.pinyin-answer{font-size:clamp(21px,2.5vw,29px);letter-spacing:.5px;padding-left:32px;font-family:var(--font)}
 .level{min-width:135px;line-height:1.4}.level strong{display:block;font-size:14px}.level small{display:block;font-size:11px;color:var(--muted);margin-top:3px}.xp-mini{display:block;height:4px;background:#ffffff15;border-radius:5px;margin-top:5px;overflow:hidden}.xp-mini i{display:block;height:100%;background:var(--gold);transition:width .7s}.reward-card{border:1px solid #c8aa64;border-top:0;border-radius:0 0 16px 16px;background:radial-gradient(ellipse at top,#3c5840,#183b3a 60%,#122e33);text-align:center;padding:28px 20px 32px;animation:reward-appear .65s ease-out}.reward-kicker{font-size:12px;letter-spacing:4px;color:var(--gold)}.reward-card h3{font-size:28px;margin:12px 0;color:#fff0ba}.xp-gain{font-size:64px;line-height:1.25;font-weight:800;color:var(--gold);text-shadow:0 0 30px #ffd87544;margin:18px 0}.xp-gain span{font-size:17px;margin-left:10px;font-weight:500}.reward-card p{color:var(--muted)}.reward-progress{display:flex;align-items:center;gap:15px;max-width:440px;margin:22px auto;font-size:14px;color:#e7d9a6}.reward-progress .track{flex:1;height:10px;margin:0}.reward-progress .track i{animation:fill-xp 1.2s ease-out}.level-up-message{border:1px solid var(--gold);background:#dac26915;border-radius:10px;padding:14px;font-size:24px;color:#ffe29b;font-weight:800;max-width:450px;margin:auto;animation:reward-appear .9s}.level-up-message small{display:block;font-size:14px;color:#c9efc8;margin-top:6px}.result-xp{color:var(--gold);font-weight:700;font-size:18px;margin:15px}.defeat-exit{animation:monster-exit 1s ease-in forwards!important}.enemy-arrive{animation:monster-arrive .7s ease-out!important}.level-up .hero img{filter:drop-shadow(0 0 25px #ffe990);animation:level-glow 1s ease-in-out infinite}.victory-scene{border-color:#c8aa64}.victory-scene .scene-shade{background:radial-gradient(ellipse at 25% 70%,#e9c87122,#07292b55)}@keyframes monster-exit{30%{filter:brightness(2);transform:translateX(12px)}100%{opacity:0;transform:translateY(-30px) scale(.35);filter:brightness(3)}}@keyframes monster-arrive{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}@keyframes reward-appear{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes fill-xp{from{max-width:0}to{max-width:100%}}@keyframes level-glow{50%{filter:drop-shadow(0 0 40px #ffdf85)}}@media(max-width:760px){.topbar{height:auto;min-height:84px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap;gap:12px}.top-actions{flex-wrap:wrap}.level{display:block;min-width:110px}.level strong{font-size:12px}.reward-card h3{font-size:23px}.xp-gain{font-size:54px}.level-up-message{font-size:20px}}@media(prefers-reduced-motion:reduce){.defeat-exit{opacity:0!important}}
 @media(prefers-reduced-motion:reduce){.defeat-exit,.enemy-arrive,.reward-card,.level-up-message,.reward-progress .track i,.level-up .hero img{animation:none!important}}
+/* Keep the active round together. Small/zoomed screens may still scroll instead of clipping controls. */
+.question-help{margin-top:12px}
+body.in-battle{height:100vh;height:100svh;min-height:0;display:flex;flex-direction:column}
+.in-battle .topbar{width:100%;height:54px;min-height:54px;flex:0 0 auto;padding:4px 24px;flex-wrap:nowrap;gap:10px}
+.in-battle .brand{font-size:19px;gap:9px}.in-battle .brand small{display:none}.in-battle .brand-seal{height:34px;width:32px;font-size:24px}
+.in-battle .shell{width:100%;max-width:1100px;display:flex;flex:1 1 auto;min-height:0;padding:8px 20px 12px;gap:0}
+.in-battle .chapter-panel,.in-battle .adventure-footer{display:none}
+.in-battle .adventure{width:100%;display:flex;flex-direction:column;flex:1;min-height:0}
+.in-battle .adventure-heading{margin:0 0 6px;flex:0 0 auto;min-height:36px}
+.in-battle .adventure-heading h2{display:none}.in-battle .eyebrow{font-size:13px;letter-spacing:1px}
+.in-battle #map-button{min-height:36px;padding:5px 12px}
+.in-battle .scene{flex:1 1 190px;min-height:110px;max-height:300px;height:auto}
+.in-battle .scene-caption{display:none}
+.in-battle .combat-bars{top:9px;left:16px;right:16px;gap:12px}
+.in-battle .combatant{padding:6px 10px}.in-battle .combatant b{display:inline;float:right}.in-battle .wave-badge{padding:5px 2px}
+.in-battle .hero,.in-battle .dragon{height:clamp(75px,19svh,160px);width:clamp(75px,19svh,160px);bottom:4px}
+.in-battle .hero{left:12%}.in-battle .dragon{right:12%}
+.in-battle #play-area{flex:0 0 auto;min-width:0}
+.in-battle .question-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:10px 18px 12px}
+.in-battle .question-card>*{grid-column:1/-1;margin:0}
+.in-battle .question-title{grid-row:2;grid-column:1;text-align:left;align-self:center;font-size:17px;line-height:1.5}
+.in-battle .prompt{grid-row:2;grid-column:2;min-height:48px;font-size:32px;gap:8px;letter-spacing:1px;justify-content:flex-end}
+.in-battle .prompt .listen-big{font-size:16px;padding:8px 15px;min-height:44px}
+.in-battle .question-top{min-height:28px;font-size:13px}.in-battle .question-top button{min-height:32px;padding:3px 0;font-size:13px}
+.in-battle .answers{gap:8px}.in-battle .answer{min-height:54px;padding:7px 28px;font-size:27px}
+.in-battle .answer.pinyin-answer{font-size:24px}.in-battle .answer.meaning-answer{font-size:18px}
+.in-battle .feedback{min-height:0;font-size:14px;line-height:1.5}.in-battle .feedback:empty{display:none}
+.in-battle .hint-box{font-size:14px;padding:4px 8px;line-height:1.5}
+.in-battle .continue-row .primary{min-height:44px;padding:8px 25px}
+.in-battle .energy-heading{font-size:13px;line-height:1.5}
+.in-battle .skills{gap:8px}.in-battle .skill{min-height:48px;padding:5px 10px;gap:8px}
+.in-battle .skill .symbol{font-size:21px}.in-battle .skill strong{font-size:14px}.in-battle .skill small{font-size:11px}
+.in-battle .reward-card{padding:15px 20px 18px}.in-battle .reward-card h3{font-size:25px;margin:7px 0}
+.in-battle .xp-gain{font-size:48px;margin:8px 0}.in-battle .reward-card p{margin:8px 0;font-size:14px}
+.in-battle .reward-progress{margin:12px auto}.in-battle .level-up-message{padding:9px;font-size:21px}.in-battle #claim-reward{min-height:44px;padding:9px 22px}
+.in-battle.showing-results{height:auto;min-height:100svh}.showing-results .scene{flex:none;height:130px;min-height:130px}.showing-results .shell{flex:none}
+.showing-results .result-card{padding:16px 20px}.showing-results .result-stars{font-size:26px;margin:0}.showing-results .result-card h3{font-size:24px;margin:2px 0}.showing-results .result-card p{margin:8px 0;font-size:14px}.showing-results .result-stats{margin:12px 0}.showing-results .result-actions{margin:12px 0 18px}.showing-results .result-xp{margin:8px 0}
+@media(max-width:760px){
+ .in-battle .topbar{height:48px;min-height:48px;padding:3px 12px}.in-battle .brand{font-size:17px;letter-spacing:1px}.in-battle .brand-seal{display:none}
+ .in-battle .top-actions{flex-wrap:nowrap;gap:8px}.in-battle .level{min-width:82px}.in-battle .level strong{font-size:11px}.in-battle .level small{font-size:10px}.in-battle .xp-mini{margin-top:2px}
+ .in-battle .shell{padding:5px 8px 8px}.in-battle .adventure-heading{min-height:34px;margin-bottom:4px}.in-battle .eyebrow{font-size:12px}.in-battle #map-button{font-size:12px}
+ .in-battle .combat-bars{top:7px;left:8px;right:8px;gap:7px}.in-battle .combatant{padding:4px 7px;max-width:39%;font-size:11px}.in-battle .combatant b{display:block;float:none;font-size:10px}.in-battle .hp-track{height:7px;margin-top:3px}
+ .in-battle .hero{left:8%}.in-battle .dragon{right:8%}
+ .in-battle .question-card{padding:8px 10px 10px;gap:5px 8px}.in-battle .question-title{font-size:15px}.in-battle .prompt{font-size:28px;max-width:180px;overflow-wrap:anywhere}.in-battle .prompt .listen-big{font-size:14px;padding:7px 12px}
+ .in-battle .question-top{font-size:12px}.in-battle .question-top button{font-size:12px}.in-battle .answer{min-height:52px;padding:7px 24px;font-size:25px}.in-battle .answer.pinyin-answer{font-size:22px}
+ .in-battle .skills{gap:5px}.in-battle .skill{padding:4px;gap:5px}.in-battle .skill strong{font-size:12px}.in-battle .skill small{font-size:10px}.in-battle .skill .symbol{font-size:18px}
+ .in-battle .reward-card{padding:12px 12px 16px}.in-battle .reward-card h3{font-size:22px}.in-battle .level-up-message{font-size:19px}
+}
+@media(orientation:landscape) and (max-height:520px) and (min-width:600px){
+ .in-battle .topbar{height:42px;min-height:42px}.in-battle .shell{padding:3px 8px 6px;max-width:1400px}
+ .in-battle .adventure{display:grid;grid-template-columns:minmax(190px,30%) minmax(0,1fr);grid-template-rows:34px minmax(0,1fr);gap:4px 8px}
+ .in-battle .adventure-heading{grid-column:1/-1;margin:0;min-height:0}.in-battle .scene{grid-column:1;grid-row:2;min-height:150px;height:100%;max-height:none;border:1px solid #587461;border-radius:12px}
+ .in-battle #play-area{grid-column:2;grid-row:2;align-self:center}.in-battle .question-card,.in-battle .reward-card{border:1px solid #587461;border-radius:12px;padding:4px 10px;gap:2px 8px}
+ .in-battle .answers{grid-template-columns:repeat(var(--choice-count,2),minmax(0,1fr));gap:5px}.in-battle .answer{min-height:46px;font-size:23px;padding:5px 20px}.in-battle .answer.pinyin-answer{font-size:19px}.in-battle .answer-key{left:4px;width:15px;font-size:10px}
+ .in-battle .prompt{min-height:42px;font-size:26px}.in-battle .question-title{font-size:15px}.in-battle .hint-box,.in-battle .feedback{font-size:13px;line-height:1.35}.in-battle .question-top{min-height:24px}.in-battle .question-top button{min-height:26px}.in-battle .prompt{line-height:1.35}.in-battle .answer{line-height:1.35}.in-battle .skill{min-height:44px}
+ .in-battle .combat-bars{flex-wrap:wrap;justify-content:space-between;gap:5px}.in-battle .combatant{width:46%;max-width:none;padding:4px;font-size:10px}.in-battle .combatant b{float:none;display:block}.in-battle .wave-badge{order:3;width:100%;text-align:center}
+ .in-battle .hero,.in-battle .dragon{width:90px;height:90px}.in-battle .hero{left:0}.in-battle .dragon{right:0}
+ .in-battle .reward-kicker{font-size:10px}.in-battle .reward-card h3{font-size:19px;margin:3px}.in-battle .xp-gain{font-size:35px;margin:3px}.in-battle .reward-progress{margin:6px auto}.in-battle .level-up-message{padding:4px;font-size:17px}.in-battle .reward-card p{margin:4px;font-size:12px}
+ .in-battle.showing-results .adventure{display:flex}.in-battle.showing-results .scene{height:110px;min-height:110px}
+}
+@media(max-width:600px) and (max-height:650px){
+ .in-battle .reward-card{padding:8px 10px 12px}.in-battle .reward-card h3{font-size:20px}.in-battle .reward-progress{margin:8px auto}
+ .in-battle .scene{min-height:96px}.in-battle .hero,.in-battle .dragon{width:72px;height:72px}
+ .in-battle #hero-hp-label,.in-battle #enemy-hp-label{display:none}
+ .in-battle .question-card{gap:3px 7px;padding:6px 8px 8px}.in-battle .question-title{font-size:14px}
+ .in-battle .prompt{min-height:42px;font-size:26px;line-height:1.35}.in-battle .prompt .listen-big{min-height:42px;font-size:13px;padding:6px 10px}
+ .in-battle .answers{gap:6px}.in-battle .answer{min-height:46px;line-height:1.35;padding:5px 22px;font-size:24px}.in-battle .answer.pinyin-answer{font-size:21px}
+ .in-battle .question-top{min-height:26px}.in-battle .question-top button{min-height:28px}
+ .in-battle .energy-heading{font-size:12px}.in-battle .skill{min-height:44px}.in-battle .hint-box,.in-battle .feedback{font-size:13px;line-height:1.4}
+}
