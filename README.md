@@ -6,11 +6,11 @@ Everything here works from **Hong Kong without a VPN** and uses **free** service
 
 | # | Prototype | What it is | Built with | Status |
 |---|---|---|---|---|
-| 1 | [**Speaking Pal**](01-speaking-pal/) | Voice conversation partner (English / Putonghua / Cantonese) with gentle tips | One HTML file + browser speech + OpenRouter free models | ✅ available |
+| 1 | [**Speaking Pal**](01-speaking-pal/) | Voice conversation partner (English / Putonghua / Cantonese) with gentle tips | One HTML file + browser speech + OpenRouter free models | ✅ [play](https://chinhsi.github.io/ailt9004-ai-prototypes/01-speaking-pal/speaking-pal.html) |
 | 2 | Essay Grader | Rubric-based scoring and feedback inside Google Sheets | Google Sheets + Apps Script + OpenRouter | coming |
 | 3 | Lesson Pack Agent | One command turns any text into a 5-file lesson pack | OpenCode CLI + two plain-text rule files | coming |
-| 4 | [**Irony Mirror 反諷鏡**](04-irony-mirror/) | One word, two faces: sincere vs ironic, with captions, pictures, a discussion scaffold and a *Spot the irony* game | One HTML file + OpenRouter free models + a free image URL service (Pollinations) | ✅ available |
-| 5 | [**Picture Talk 看圖說話**](05-picture-talk/) | A game: the AI hides a sentence, draws it, you describe the picture, the AI marks content and gives one tip; streaks and best score | One HTML file + OpenRouter free models + Pollinations + browser speech (optional) | ✅ available |
+| 4 | [**Irony Mirror 反諷鏡**](04-irony-mirror/) | One word, two faces: sincere vs ironic, with captions, pictures, a discussion scaffold and a *Spot the irony* game | One HTML file + OpenRouter free models + a free image URL service (Pollinations) | ✅ [play](https://chinhsi.github.io/ailt9004-ai-prototypes/04-irony-mirror/irony-mirror.html) |
+| 5 | [**Picture Talk 看圖說話**](05-picture-talk/) | A game: the AI hides a sentence, draws it, you describe the picture, the AI marks content and gives one tip; streaks and best score | One HTML file + OpenRouter free models + Pollinations + browser speech (optional) | ✅ [play](https://chinhsi.github.io/ailt9004-ai-prototypes/05-picture-talk/picture-talk.html) |
 | 6 | [**认字乐园 Hanzi Game**](06-hanzi-game/) | Phone-first Chinese character game: six question types, spaced repetition (five boxes), real recorded voice, parent page — built by a coding assistant from a one-page teacher note | Vite + TypeScript + tests (source private; brief, build story and live game here) | ✅ [play](https://chinhsi.github.io/hanzi-game-pages/) |
 | 7 | [**字靈冒險 Hanzi Quest**](07-hanzi-quest/) | Chinese word battles: rotating listening/pinyin questions, whole-word audio, skills, monster rewards and character levels; browser-local progress | Static HTML/CSS/JavaScript + packaged audio; no key or live AI service | ✅ [play](https://chinhsi.github.io/ailt9004-ai-prototypes/07-hanzi-quest/) |
 
