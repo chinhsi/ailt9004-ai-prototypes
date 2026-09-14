@@ -126,7 +126,7 @@
       <option value="paper">Paper white on black</option>
     </select></div>
   <div class="row"><label>Picture style</label><input id="style" value="warm watercolor illustration, soft ink outlines, muted colours, everyday Hong Kong setting, no text or letters anywhere"></div>
-  <p class="hint">Your keys are stored only in this browser (localStorage). Never share the file with a key typed in. Free OpenRouter models: 50 requests a day, and your prompts may be used for training, so never type real names. Pictures come from Pollinations.ai. With a free key (sign up at enter.pollinations.ai with GitHub or Google, create a <i>publishable</i> key) you get a weekly allowance that covers hundreds of small pictures, better models and no watermark. Without a key the old anonymous endpoint still works, but only one picture at a time per network address and with a watermark. If pictures fail, use <b>Copy prompt</b> and paste it into any image tool you have (for example the Gemini app).</p>
+  <p class="hint">Your keys are stored only in this browser (localStorage). Never share the file with a key typed in. Free OpenRouter models: 50 requests a day, and your prompts may be used for training, so never type real names. The poster poem is the one thing free models are noticeably worse at — the parallel couplets go slack, especially in Cantonese — so switch the preset to <b>Premium</b> when the poster is the point of the lesson. Pictures come from Pollinations.ai. With a free key (sign up at enter.pollinations.ai with GitHub or Google, create a <i>publishable</i> key) you get a weekly allowance that covers hundreds of small pictures, better models and no watermark. Without a key the old anonymous endpoint still works, but only one picture at a time per network address and with a watermark. If pictures fail, use <b>Copy prompt</b> and paste it into any image tool you have (for example the Gemini app).</p>
 </section>
 
 <!-- ============ Explore ============ -->
@@ -252,19 +252,32 @@ Produce a JSON object with exactly these keys:
  "ironic": ONE sharp but kind, witty redefinition in the spirit of 錢鍾書 / Oscar Wilde: say the opposite of what is expected and expose the gap between what people SAY and what they DO. Max 40 characters (or 20 English words). Mock behaviours, never people or groups: no real people; no ethnic, national (including mainland/Hong Kong), religious, gender, sexuality, disability, body/appearance, class or domestic-worker stereotypes; no jokes about death, grief, illness, poverty, family break-up or academic failure — some students in the room live with these.
  "sceneA": {"caption": one short sentence describing the value done sincerely by ordinary people, "imagePrompt": an English prompt for an image generator: one concrete everyday scene, two or three people at most, clear actions, no text in the image},
  "sceneB": {"caption": one short sentence describing the ironic scene where words claim the value and actions show the opposite, "imagePrompt": English prompt for the SAME setting and people as sceneA, but now the claim is visible as a symbol (a glowing heart icon on a phone, a medal, a banner, a thumbs-up) while the action in the foreground shows the opposite; describe exactly two figures, their body language and where each is looking, so the contradiction is visible without words; no text in the image},
- "poem": THE CARD TEXT, and the most important field here. An array of exactly 4 stanzas; each stanza is itself an ARRAY OF SHORT LINES (1 to 4 lines per stanza). Keep every line short: at most 16 Chinese characters, or 9 English words. Same safety rules as "ironic" — mock the behaviour, never a person or a group.
-   If the output language is Chinese or Cantonese, follow the 漢語新解 form, four moves:
-     1. 降格定義 — one line. Class the people who practise this word as a species or a type. e.g. ["一種學會了在象牙塔裡養老的動物。"]
-     2. 對仗雙句 — two lines, identical structure, built on ONE pair of opposites. e.g. ["用知識的厚度掩蓋思想的薄度，", "用頭銜的重量壓制靈魂的輕盈。"]
-     3. 排比加揭穿 — three parallel short clauses, then one line that gives the game away. e.g. ["他們把真理裝進文件夾，", "把智慧鎖在辦公室，", "然後告訴學生：", "這就是人生的全部奧秘。"]
-     4. 反諷式讚美 — opens with 最擅長的技能是 or 最厲害的本事是, then two parallel lines. e.g. ["最擅長的技能是", "把簡單的事情說得無人能懂，", "把無聊的內容講得催人入睡。"]
-   If the output language is English, follow the equivalent aphorism-stack form, four moves:
-     1. A mock dictionary definition, one line, classing them as a species or a type. e.g. ["A species that has learned to grow old inside a tower."]
-     2. A balanced couplet on ONE pair of opposites, two lines. e.g. ["Using the thickness of knowledge to hide the thinness of thought,", "using the weight of a title to crush the lightness of a soul."]
-     3. Three parallel clauses, then one line that gives the game away.
-     4. An ironic compliment opening "Their finest skill is" or "What they do best is", then two parallel lines.
  "ironyType": "verbal" | "situational" | "dramatic",
  "gap": one sentence naming the contradiction (what is said vs what is done, surface vs reality),
+ "poem": THE CARD TEXT, and the most important field here. Write it LAST, after you have settled the gap above, so the poem is built on a real contradiction and not on a general feeling about the word. An array of exactly 4 stanzas; each stanza is itself an ARRAY OF SHORT LINES (1 to 4 lines). Break lines on the breath, not on a character count — roughly 10 to 16 Chinese characters, or 6 to 10 English words, per line.
+
+ HOW TO WRITE IT — these rules matter more than the topic:
+   a. CONCRETE BEATS ABSTRACT. An abstract virtue must land in a physical container, place or gesture: 真理 goes into 文件夾, 智慧 gets 鎖在辦公室. Never set one abstraction against another — "把口號說成改變" is dead writing because both halves are abstract.
+   a2. TAKE THE OBJECTS FROM THE WORD'S OWN WORLD. Ask where this word actually lives — a classroom, a dinner table, a ward, a building site, a shop floor, a funeral, a kitchen — and furnish the poem from there. Do NOT default to phones, apps, selfies, hashtags, posts, filters, followers or "content": that is the laziest available joke and it fits almost no word. Reach for a screen only when the word is genuinely about online life.
+   a3. NEVER REUSE THE EXAMPLE LINES BELOW, not even when the given word is the same word the example uses. The examples show the shape; the words must be yours.
+   b. THE AUTHOR NEVER SPEAKS. Do not comment, conclude, moralise or explain the joke. The turn is made by quoting what they SAY or showing what they DO, and letting it sit: 然後告訴學生：這就是人生的全部奧秘。
+   c. VERBS CARRY THE JUDGEMENT. Use verbs that already accuse — 掩蓋, 壓制, 鎖, 裝, 換取, 蓋過. Avoid 是 / 有 / 存在 and their English equivalents.
+   d. NO 成語, no piled-up adjectives, no opening with 其實 / 真正的 / in reality / the truth is.
+   e. Every stanza must be able to stand alone as one line of a poster.
+
+ If the output language is Chinese or Cantonese, follow the 漢語新解 form, four moves:
+   1. 降格定義 — one line. Class the practitioners as a species or a type, and name the place they live in. The whole irony should sit in one verb. e.g. ["一種學會了在象牙塔裡養老的動物。"] — 養老, not 工作, is the entire joke.
+   2. 對仗雙句 — two lines, identical grammatical structure. This move FAILS unless each line contains a NAMED pair of opposite words. Before writing, pick two antonym pairs (厚/薄, 重/輕, 亮/暗, 快/慢, 高/低, 滿/空, 熱/冷) and build one line around each; the contrast should also run from the outward thing to the inward thing. e.g. ["用知識的厚度掩蓋思想的薄度，", "用頭銜的重量壓制靈魂的輕盈。"] — 厚/薄 and 重/輕 are on the page; 知識與頭銜在外, 思想與靈魂在內. COUNTER-EXAMPLE, do not do this: "用回收標籤掩蓋消費欲望，用綠色濾鏡淡化碳足跡。" — 標籤/欲望 and 濾鏡/足跡 are not opposites, so the couplet goes slack.
+   3. 排比加揭穿 — three parallel clauses of the shape "把 [something noble] [verb] [somewhere ordinary]", then ONE line that is their own voice. e.g. ["他們把真理裝進文件夾，", "把智慧鎖在辦公室，", "然後告訴學生：", "這就是人生的全部奧秘。"]
+   4. 反諷式讚美 — opens with 最擅長的技能是 or 最厲害的本事是, then two parallel lines that praise a failure. e.g. ["最擅長的技能是", "把簡單的事情說得無人能懂，", "把無聊的內容講得催人入睡。"]
+
+ If the output language is English, follow the equivalent aphorism-stack form, same four moves and the same rules a-e:
+   1. A mock dictionary definition — ONE line, not two, classing them as a species and naming where they live, with the irony carried by one verb: ["A species that has learned to grow old inside a tower."]
+   2. A balanced couplet: TWO complete, self-contained lines, each one a whole clause, each built on its OWN pair of opposites, both following the same template "Using the [X] of [outward thing] to [verb] the [opposite of X] of [inward thing]". e.g. ["Using the thickness of knowledge to hide the thinness of thought,", "using the weight of a title to crush the lightness of a soul."] — line one is thickness/thinness, line two is weight/lightness. WRONG, do not do this: ["Wearing the weight of timetables", "to lighten the burden of waiting."] — that is one sentence broken in half, with a single pair shared between the two lines. DO NOT RHYME. This is not verse; rhyme turns it into doggerel.
+   3. Three parallel clauses that file something noble somewhere ordinary, then one line in their own voice.
+   4. An ironic compliment opening "Their finest skill is" or "What they do best is", then two parallel lines praising a failure.
+   Across all four English stanzas: no rhyme, no metre, plain concrete nouns, and the same ban on phones and social media unless the word is about online life.
+ Same safety rules as "ironic": mock the behaviour, never a person or a group.
  "questions": [3 short discussion questions suited to the level],
  "modelSentence": one example sentence a learner could write using irony about this word,
  "safetyNote": "" or a one-line note for the teacher if the word could hurt someone in the room
