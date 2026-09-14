@@ -47,7 +47,7 @@
   .tag { display:inline-block; background:var(--sand); border-radius:10px; padding:2px 8px; font-size:12px; color:var(--muted); margin-left:6px; }
   .safety { background:#fff6e5; border:1px solid #f0d9a8; border-radius:8px; padding:8px 12px; font-size:13px; }
   #cardWrap { text-align:center; }
-  #cardWrap svg { max-width:100%; height:auto; border:1px solid var(--line); border-radius:8px; }
+  #cardWrap svg { max-width:100%; max-height:78vh; width:auto; height:auto; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,.15); }
   /* game */
   .gamebar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:14px; }
   .gamebar .score { font-weight:700; color:var(--green); font-size:16px; }
@@ -117,6 +117,14 @@
       </select></div></div>
   <div class="row hidden" id="imgRow"><label>Images base URL / key / model</label>
     <div style="display:flex; gap:6px; flex-wrap:wrap"><input id="imgBase" placeholder="https://your-server/v1" style="flex:2"><input id="imgKey" type="password" placeholder="key" style="flex:1"><input id="imgModel" placeholder="model id" style="flex:1"></div></div>
+  <div class="row"><label>Card colour</label>
+    <select id="cardPalette" style="flex:1; padding:7px; border:1px solid var(--line); border-radius:6px">
+      <option value="yellow">Lemon yellow on black (default)</option>
+      <option value="orange">Orange on black</option>
+      <option value="blue">Deep blue, white text</option>
+      <option value="sage">Sage green on black</option>
+      <option value="paper">Paper white on black</option>
+    </select></div>
   <div class="row"><label>Picture style</label><input id="style" value="warm watercolor illustration, soft ink outlines, muted colours, everyday Hong Kong setting, no text or letters anywhere"></div>
   <p class="hint">Your keys are stored only in this browser (localStorage). Never share the file with a key typed in. Free OpenRouter models: 50 requests a day, and your prompts may be used for training, so never type real names. Pictures come from Pollinations.ai. With a free key (sign up at enter.pollinations.ai with GitHub or Google, create a <i>publishable</i> key) you get a weekly allowance that covers hundreds of small pictures, better models and no watermark. Without a key the old anonymous endpoint still works, but only one picture at a time per network address and with a watermark. If pictures fail, use <b>Copy prompt</b> and paste it into any image tool you have (for example the Gemini app).</p>
 </section>
@@ -167,7 +175,7 @@
         <button class="ghost" id="dlJson">Save result (JSON)</button>
         <button class="ghost" id="printSheet">Print worksheet</button>
       </div>
-      <p class="hint">The card is drawn by your browser (SVG), so it costs nothing and never fails. The pictures above are the new part: an image model reads the prompt the AI wrote.</p>
+      <p class="hint">The poster is drawn by your browser (SVG) — it costs nothing, never fails, and downloads at 1440&times;2160 for sharing. Four moves make the text: a mock definition, a balanced couplet, three parallel clauses with a turn, and an ironic compliment. That is the frame students copy. The pictures above are the new part: an image model reads the prompt the AI wrote.</p>
     </div>
   </div>
 </section>
@@ -244,6 +252,17 @@ Produce a JSON object with exactly these keys:
  "ironic": ONE sharp but kind, witty redefinition in the spirit of 錢鍾書 / Oscar Wilde: say the opposite of what is expected and expose the gap between what people SAY and what they DO. Max 40 characters (or 20 English words). Mock behaviours, never people or groups: no real people; no ethnic, national (including mainland/Hong Kong), religious, gender, sexuality, disability, body/appearance, class or domestic-worker stereotypes; no jokes about death, grief, illness, poverty, family break-up or academic failure — some students in the room live with these.
  "sceneA": {"caption": one short sentence describing the value done sincerely by ordinary people, "imagePrompt": an English prompt for an image generator: one concrete everyday scene, two or three people at most, clear actions, no text in the image},
  "sceneB": {"caption": one short sentence describing the ironic scene where words claim the value and actions show the opposite, "imagePrompt": English prompt for the SAME setting and people as sceneA, but now the claim is visible as a symbol (a glowing heart icon on a phone, a medal, a banner, a thumbs-up) while the action in the foreground shows the opposite; describe exactly two figures, their body language and where each is looking, so the contradiction is visible without words; no text in the image},
+ "poem": THE CARD TEXT, and the most important field here. An array of exactly 4 stanzas; each stanza is itself an ARRAY OF SHORT LINES (1 to 4 lines per stanza). Keep every line short: at most 16 Chinese characters, or 9 English words. Same safety rules as "ironic" — mock the behaviour, never a person or a group.
+   If the output language is Chinese or Cantonese, follow the 漢語新解 form, four moves:
+     1. 降格定義 — one line. Class the people who practise this word as a species or a type. e.g. ["一種學會了在象牙塔裡養老的動物。"]
+     2. 對仗雙句 — two lines, identical structure, built on ONE pair of opposites. e.g. ["用知識的厚度掩蓋思想的薄度，", "用頭銜的重量壓制靈魂的輕盈。"]
+     3. 排比加揭穿 — three parallel short clauses, then one line that gives the game away. e.g. ["他們把真理裝進文件夾，", "把智慧鎖在辦公室，", "然後告訴學生：", "這就是人生的全部奧秘。"]
+     4. 反諷式讚美 — opens with 最擅長的技能是 or 最厲害的本事是, then two parallel lines. e.g. ["最擅長的技能是", "把簡單的事情說得無人能懂，", "把無聊的內容講得催人入睡。"]
+   If the output language is English, follow the equivalent aphorism-stack form, four moves:
+     1. A mock dictionary definition, one line, classing them as a species or a type. e.g. ["A species that has learned to grow old inside a tower."]
+     2. A balanced couplet on ONE pair of opposites, two lines. e.g. ["Using the thickness of knowledge to hide the thinness of thought,", "using the weight of a title to crush the lightness of a soul."]
+     3. Three parallel clauses, then one line that gives the game away.
+     4. An ironic compliment opening "Their finest skill is" or "What they do best is", then two parallel lines.
  "ironyType": "verbal" | "situational" | "dramatic",
  "gap": one sentence naming the contradiction (what is said vs what is done, surface vs reality),
  "questions": [3 short discussion questions suited to the level],
@@ -253,7 +272,7 @@ Produce a JSON object with exactly these keys:
 Output ONLY the JSON object. No code fences, no commentary.`;
 
 // ---------- settings persistence ----------
-['apiKey', 'baseUrl', 'model', 'lang', 'level', 'imgProvider', 'pollKey', 'pollModel', 'imgBase', 'imgKey', 'imgModel', 'style', 'gameWords'].forEach(id => {
+['apiKey', 'baseUrl', 'model', 'lang', 'level', 'imgProvider', 'pollKey', 'pollModel', 'imgBase', 'imgKey', 'imgModel', 'style', 'cardPalette', 'gameWords'].forEach(id => {
   const v = load(id, null); if (v !== null) $(id).value = v;
   $(id).addEventListener('change', () => store(id, $(id).value));
 });
@@ -329,7 +348,9 @@ function normalize(o) {
   if (!o || typeof o !== 'object') return null;
   const str = v => (v == null) ? '' : (typeof v === 'string' ? v : (typeof v === 'object' ? JSON.stringify(v) : String(v)));
   const scene = v => (v && typeof v === 'object') ? { caption: str(v.caption), imagePrompt: str(v.imagePrompt || v.prompt) } : { caption: str(v), imagePrompt: str(v) };
+  const stanza = v => Array.isArray(v) ? v.map(str).filter(Boolean) : (str(v) ? str(v).split(/\n+/).map(x => x.trim()).filter(Boolean) : []);
   const out = { word: str(o.word), sincere: str(o.sincere), ironic: str(o.ironic), sceneA: scene(o.sceneA), sceneB: scene(o.sceneB),
+    poem: Array.isArray(o.poem) ? o.poem.map(stanza).filter(a => a.length).slice(0, 5) : stanza(o.poem).map(l => [l]).slice(0, 5),
     ironyType: str(o.ironyType).toLowerCase() || 'situational', gap: str(o.gap), modelSentence: str(o.modelSentence), safetyNote: str(o.safetyNote),
     questions: Array.isArray(o.questions) ? o.questions.map(str).filter(Boolean).slice(0, 5) : (o.questions ? [str(o.questions)] : []) };
   if (!out.ironic || !out.sceneA.imagePrompt || !out.sceneB.imagePrompt) return null;   // too little to work with: caller retries
@@ -456,30 +477,84 @@ document.querySelectorAll('[data-regen]').forEach(b => b.addEventListener('click
 }));
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-// ---------- the card: drawn by the browser, in the spirit of 漢語新解 ----------
-function wrap(text, max) {   // crude wrap: CJK by characters, Latin by words
+// ---------- the card: a portrait poster, in the spirit of 漢語新解 ----------
+// Lines are wrapped by measuring them in the SAME font the SVG draws with (canvas
+// measureText), so Chinese and English both break where they actually run out of room —
+// the old char-count guess is what pushed text past the border.
+const POSTER_FONT = "'PingFang HK','PingFang TC','PingFang SC','Noto Sans CJK TC','Source Han Sans TC','Hiragino Sans GB','Microsoft JhengHei','Heiti TC',system-ui,sans-serif";
+const PALETTES = {
+  yellow: { bg: '#E2E034', ink: '#141414' },
+  orange: { bg: '#F0813C', ink: '#141414' },
+  blue:   { bg: '#2E7D96', ink: '#FFFFFF' },
+  sage:   { bg: '#A9B99B', ink: '#14180F' },
+  paper:  { bg: '#F7F5EE', ink: '#141414' }
+};
+const _mc = document.createElement('canvas').getContext('2d');
+function measure(t, px, weight) { _mc.font = (weight || 400) + ' ' + px + 'px ' + POSTER_FONT; return _mc.measureText(t).width; }
+const HANG = '，。、；：！？）」』》〉…·—,.;:!?)]';        // a line may never start with these
+const NOEND = '「『（《〈([';                                 // …nor end with these
+function wrapPx(text, maxW, px, weight) {
+  text = String(text || '').trim();
+  if (!text || measure(text, px, weight) <= maxW) return text ? [text] : [];
   const cjk = /[　-鿿＀-￯]/.test(text);
-  if (cjk) { const out = []; for (let i = 0; i < text.length; i += max) out.push(text.slice(i, i + max)); return out; }
+  const units = cjk ? Array.from(text) : text.split(/(\s+)/);
   const out = []; let line = '';
-  for (const w of text.split(/\s+/)) { if ((line + ' ' + w).trim().length > max * 2) { out.push(line.trim()); line = w; } else line += ' ' + w; }
+  for (const u of units) {
+    if (line && measure(line + u, px, weight) > maxW) {
+      if (HANG.includes(u)) { out.push((line + u).trim()); line = ''; continue; }   // let punctuation hang
+      let carry = '';
+      if (NOEND.includes(line.slice(-1))) { carry = line.slice(-1); line = line.slice(0, -1); }  // don't strand an opening bracket
+      out.push(line.trim()); line = carry + (/^\s+$/.test(u) ? '' : u);
+    } else line += u;
+  }
   if (line.trim()) out.push(line.trim());
   return out;
 }
+function fitText(t, maxW, from, to, weight) {   // largest size at which t fits on one line
+  for (let px = from; px > to; px--) if (measure(t, px, weight) <= maxW) return px;
+  return to;
+}
 function drawCard(o) {
-  const lines = wrap(o.ironic || '', 12);
-  const W = 420, top = 150, lh = 34, H = Math.max(360, top + lines.length * lh + 120);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="'Noto Serif CJK TC','Songti TC','PingFang HK','Microsoft JhengHei',serif">
-  <rect width="${W}" height="${H}" fill="#faf6ee"/>
-  <rect x="14" y="14" width="${W - 28}" height="${H - 28}" fill="none" stroke="#1f2a24" stroke-width="1.5"/>
-  <text x="${W / 2}" y="52" text-anchor="middle" font-size="13" letter-spacing="4" fill="#6b7570">反諷鏡 · IRONY MIRROR</text>
-  <text x="${W / 2}" y="112" text-anchor="middle" font-size="44" font-weight="700" fill="#1f2a24">${esc(o.word)}</text>
-  <line x1="60" y1="130" x2="${W - 60}" y2="130" stroke="#b3402f" stroke-width="2"/>
-  ${lines.map((l, i) => `<text x="${W / 2}" y="${top + 30 + i * lh}" text-anchor="middle" font-size="24" fill="#1f2a24">${esc(l)}</text>`).join('')}
-  <text x="${W / 2}" y="${H - 62}" text-anchor="middle" font-size="13" fill="#6b7570">${esc((o.ironyType || '') + ' irony')}</text>
-  <text x="${W / 2}" y="${H - 40}" text-anchor="middle" font-size="12" fill="#b3402f">${esc((o.gap || '').slice(0, 40))}</text>
+  const palSel = $('cardPalette');
+  const pal = PALETTES[palSel ? palSel.value : 'yellow'] || PALETTES.yellow;
+  const stanzas = (o.poem && o.poem.length) ? o.poem : [[o.ironic || '']];
+  const flat = stanzas.map(st => st.join('')).join('');
+  const isCJK = /[　-鿿]/.test(flat + (o.word || ''));
+  const series = isCJK ? '反諷鏡' : 'IRONY MIRROR';
+
+  const W = 720, H = 1080, M = 64, CW = W - M * 2;
+  const bodyTop = 318, bodyBottom = H - 92;         // breathing room under the word, and space for the irony tag
+  const room = bodyBottom - bodyTop;
+
+  // shrink the body until every wrapped line fits inside the poster
+  let px = 40, lh = 0, gap = 0, laid = [], total = 0;
+  for (; px >= 16; px--) {
+    lh = Math.round(px * 1.62); gap = Math.round(px * 0.95);
+    laid = stanzas.map(st => st.flatMap(l => wrapPx(l, CW, px, 500)));
+    total = laid.reduce((a, st) => a + st.length * lh, 0) + (laid.length - 1) * gap;
+    if (total <= room) break;
+  }
+
+  const wordPx = fitText(o.word || '', CW, 96, 28, 800);
+  const seriesPx = isCJK ? 44 : 34;
+  // centre the text block in its region so a short poem does not leave the poster bottom-heavy
+  let y = bodyTop + Math.max(0, (room - total) / 2) + px, rows = '';
+  laid.forEach((st, i) => {
+    st.forEach(l => { rows += `<text x="${M}" y="${Math.round(y)}" font-size="${px}" font-weight="500">${esc(l)}</text>`; y += lh; });
+    if (i < laid.length - 1) y += gap;
+  });
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${POSTER_FONT.replace(/"/g, '&quot;')}" fill="${pal.ink}">
+  <rect width="${W}" height="${H}" fill="${pal.bg}"/>
+  <text x="${W / 2 - (isCJK ? 6 : 3)}" y="100" text-anchor="middle" font-size="${seriesPx}" font-weight="800" letter-spacing="${isCJK ? 12 : 6}">${esc(series)}</text>
+  <rect x="${M - 16}" y="130" width="${CW + 32}" height="9" fill="${pal.ink}"/>
+  <text x="${M}" y="252" font-size="${wordPx}" font-weight="800">${esc(o.word || '')}</text>
+  ${rows}
+  <text x="${M}" y="${H - 56}" font-size="19" font-weight="600" opacity="0.5">${esc((o.ironyType || '') + ' irony')}</text>
 </svg>`;
   $('card').innerHTML = svg;
 }
+$('cardPalette').addEventListener('change', () => { if (current) drawCard(current); });
 $('dlCard').addEventListener('click', () => {
   const svg = $('card').querySelector('svg'); if (!svg) return;
   const xml = new XMLSerializer().serializeToString(svg);
@@ -502,6 +577,7 @@ $('printSheet').addEventListener('click', () => {
   w.document.write(`<html><head><meta charset="utf-8"><title>Irony Mirror – ${esc(o.word)}</title><style>body{font-family:serif;max-width:700px;margin:30px auto;line-height:1.6}h1{font-size:28px}.box{border:1px solid #999;padding:10px;margin:10px 0;min-height:60px}small{color:#666}</style></head><body>
   <h1>${esc(o.word)} <small>· Irony Mirror worksheet</small></h1>
   <p><b>Face A:</b> ${esc(o.sceneA.caption)}</p><p><b>Face B:</b> ${esc(o.sceneB.caption)}</p>
+  ${(o.poem && o.poem.length) ? '<div style="border-left:3px solid #333;padding-left:12px;margin:14px 0">' + o.poem.map(st => '<p style="margin:0 0 10px">' + st.map(esc).join('<br>') + '</p>').join('') + '</div>' : ''}
   <p>1. Describe what is happening in each picture.</p><div class="box"></div>
   <p>2. What is the gap between what is said and what is done?</p><div class="box"></div>
   <p>3. Write one sentence using irony about ${esc(o.word)}.</p><div class="box"></div>
