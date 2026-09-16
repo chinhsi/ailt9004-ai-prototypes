@@ -6,7 +6,7 @@ A Chinese vocabulary battle game for heritage-language learners. Read, listen, c
 
 ## Start playing
 
-Nothing to install and no API key required. Open the link, choose a chapter, and press **開始冒險**. Audio is prepared when a chapter opens. The parent settings let you choose Traditional or Simplified Chinese, two to four answer options, and the practice mode.
+Nothing to install and no API key required. Open the link, press **切換關卡**, select Book 1 or Book 2 and a lesson, then press **開始冒險**. Audio is prepared when a chapter opens. The parent settings let you choose Traditional or Simplified Chinese, two to four answer options, and the practice mode.
 
 The default rotates:
 
@@ -31,13 +31,13 @@ Wrong answers lead to correction and a later revisit. Correct answers charge att
 
 ## Curriculum and assets
 
-Seven chapters and 56 selected practice items draw on the public first-unit character scope and chapter sequence of Ma Liping Chinese. This is an independent supplementary game, not an official textbook product, a full syllabus, or a reproduction of textbook exercises. Check the chapter mapping against the edition used in class.
+Two books (Grade 1 Units 1–2), fourteen lessons and 112 selected practice items draw on the public character scope and lesson sequence of Ma Liping Chinese. Each lesson has eight selected review items; this is not coverage of every character. The picker and lesson heading show book, lesson and teaching week. Unit 2 lesson 6 is labelled 小小的船, with the character-list title 彎彎的月亮 shown as an alias. This is an independent supplementary game, not an official textbook product, a full syllabus, or a reproduction of textbook exercises. Check the chapter mapping against the edition used in class.
 
 - [Official first-grade overview](https://mlpchinese.com/website/page/G1/)
 - [Official character scope](https://mlpchinese.com/static/common/pdf/01-shengzi.pdf)
 - [Official chapter sequence](https://mlpchinese.com/support/grade/1/)
 
-Illustrations are original AI-generated game assets, not textbook artwork. The 56 word recordings and four instruction recordings are AI-synthesized Mandarin (Xiaoxiao), not human recordings. Each word was generated as a complete phrase; syllables are not concatenated. Teachers should listen for pronunciation, neutral tones, and regional preferences before classroom use.
+Illustrations are original AI-generated game assets, not textbook artwork. The 112 word recordings and four instruction recordings are AI-synthesized Mandarin (Xiaoxiao), not human recordings. Each word was generated as a complete phrase; syllables are not concatenated. Teachers should listen for pronunciation, neutral tones, and regional preferences before classroom use.
 
 ## Adapt or host it
 
