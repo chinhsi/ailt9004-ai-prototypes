@@ -52,7 +52,7 @@ body.in-battle{height:100vh;height:100svh;min-height:0;display:flex;flex-directi
  .in-battle .skills{gap:5px}.in-battle .skill{padding:4px;gap:5px}.in-battle .skill strong{font-size:12px}.in-battle .skill small{font-size:10px}.in-battle .skill .symbol{font-size:18px}
  .in-battle .reward-card{padding:12px 12px 16px}.in-battle .reward-card h3{font-size:22px}.in-battle .level-up-message{font-size:19px}
 }
-@media(orientation:landscape) and (max-height:520px) and (min-width:600px){
+@media(orientation:landscape) and (max-height:650px) and (min-width:600px){
  .in-battle .topbar{height:42px;min-height:42px}.in-battle .shell{padding:3px 8px 6px;max-width:1400px}
  .in-battle .adventure{display:grid;grid-template-columns:minmax(190px,30%) minmax(0,1fr);grid-template-rows:34px minmax(0,1fr);gap:4px 8px}
  .in-battle .adventure-heading{grid-column:1/-1;margin:0;min-height:0}.in-battle .scene{grid-column:1;grid-row:2;min-height:150px;height:100%;max-height:none;border:1px solid #587461;border-radius:12px}
@@ -92,3 +92,12 @@ body.in-battle{height:100vh;height:100svh;min-height:0;display:flex;flex-directi
  .chapter-picker #chapters{display:grid;overflow:visible;grid-template-columns:1fr}
  .chapter-picker .chapter-button{width:100%;min-width:0;flex:none}
 }
+
+/* Reserve actual room below the health bars for both combatants. */
+.in-battle .scene{container-type:size;min-height:180px}
+.in-battle .hero,.in-battle .dragon{width:clamp(64px,calc(100cqh - 100px),160px);height:clamp(64px,calc(100cqh - 100px),160px);bottom:6px}
+@media(orientation:landscape) and (max-height:650px) and (min-width:600px){
+ .in-battle .scene{min-height:210px}
+ .in-battle .hero,.in-battle .dragon{width:min(42cqw,140px);height:min(42cqw,calc(100cqh - 125px),140px)}
+}
+@media(max-width:600px) and (max-height:650px){.in-battle .scene{min-height:156px}}
