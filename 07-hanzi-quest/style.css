@@ -117,3 +117,6 @@ body.in-battle{height:100vh;height:100svh;min-height:0;display:flex;flex-directi
 .chapter-picker .chapter-button small{display:block;font-size:11px;line-height:1.5}
 .chapter-picker .chapter-number{width:25px}
 .book-field{margin:10px 0}.start-top .curriculum-note{font-size:12px;color:var(--gold);margin-top:6px}
+
+.home-growth{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--gold)}
+.bag-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.bag-item>div{flex:1}.bag-item h3{font-size:18px;margin:0}.bag-item h3 span{color:var(--gold)}.bag-item p{margin:4px 0}.bag-item small{color:var(--gold)}.study-card{text-align:center}.study-card h3{font-size:44px;margin:12px 0}.item-earned{color:var(--gold)!important}.bag-button{border-color:var(--gold)}
