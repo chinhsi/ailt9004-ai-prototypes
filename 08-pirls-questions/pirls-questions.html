@@ -42,6 +42,7 @@
   .item .meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:6px; }
   .badge { font-size:11px; border-radius:10px; padding:2px 9px; background:var(--sand); color:var(--muted); }
   .badge.proc { color:#fff; }
+  .badge.warn { background:#fdeeea; color:var(--coral); font-weight:600; }
   .badge.b1 { background:var(--green); } .badge.b2 { background:var(--blue); } .badge.b3 { background:var(--gold); } .badge.b4 { background:var(--coral); }
   .qtext { font-size:16px; margin:2px 0 6px; }
   .qno { font-weight:700; color:var(--muted); margin-right:6px; }
@@ -70,7 +71,7 @@
     body.p-student .keyonly { display:none !important; }
     body.p-key #passagePanel, body.p-key .studentonly { display:none !important; }
     body.p-student .printonly, body.p-key .printonly { display:block; }
-    body.p-student .badge.proc, body.p-student .badge.fmt { display:none; }
+    body.p-student .badge.proc, body.p-student .badge.fmt, body.p-student .badge.warn { display:none; }
     body.p-student .item { padding-bottom:10px; }
     #passage { display:none; }
     #printHead h2 { font-size:17px; margin:0 0 4px; }
@@ -158,7 +159,7 @@
         <select id="nItems"><option>5</option><option selected>10</option><option>15</option></select></div>
       <div class="row"><label data-i18n="lgMix">Item format mix</label>
         <select id="mix">
-          <option value="about half multiple-choice and half constructed-response, as in PIRLS" selected>Balanced 均衡（PIRLS 慣例）</option>
+          <option value="about half multiple-choice and half constructed-response" selected>Balanced 均衡（約一半選擇題）</option>
           <option value="mostly multiple-choice (about two thirds), for quick marking">Mostly MC 多選擇題</option>
           <option value="mostly constructed-response (about two thirds), for richer evidence of thinking">Mostly CR 多開放題</option>
         </select></div>
@@ -273,8 +274,8 @@ const T = {
   lgItems: ['Number of items', '題數'], lgMix: ['Item format mix', '題型比例'], lgWeights: ['Process weights', '層次比重'],
   genBtn: ['Generate question set', '產生整份題目'], genNote: ['One request. Read every item before you use it.', '一次請求。使用前請逐題細看。'],
   coverage: ['Process coverage', '層次分布'],
-  covHint: ['PIRLS reports two lower processes (retrieve, straightforward inference) and two higher ones (interpret and integrate, evaluate and critique). A set that is all retrieval looks like a quiz, not a reading test.',
-    'PIRLS 把四個層次分成較低階（提取、直接推論）與較高階（詮釋整合、評價批判）。全是提取題的卷子只是默書式小測，不是閱讀評估。'],
+  covHint: ['PIRLS reports two lower processes (retrieve, straightforward inference) and two higher ones (interpret and integrate, evaluate and critique). A set that is all retrieval looks like a quiz, not a reading test. Note: these are the labels the model gave its own items. The panel counts those claims; it does not verify them. Read each "why" line before you believe a 3 or a 4.',
+    'PIRLS 把四個層次分成較低階（提取、直接推論）與較高階（詮釋整合、評價批判）。全是提取題的卷子只是默書式小測，不是閱讀評估。注意：這些層次標籤是模型自己貼的，本面板只統計它的宣稱、不會替你驗證；看到第 3、4 層先讀那題的「為何屬於這個層次」再決定信不信。'],
   printStudent: ['Print student sheet', '列印學生卷'], printKey: ['Print answer key', '列印答案卷'], copyMd: ['Copy as Markdown', '複製 Markdown'],
   checkHead: ['Check questions you wrote yourself', '檢核你自己寫的題目'],
   checkIntro: ['Paste your own questions (one per line). The tool says which PIRLS process each one actually measures, whether a reader could answer it from the passage above, what is wrong with it, and how to push it up one process.',
@@ -298,6 +299,10 @@ const T = {
   answer: ['Answer', '答案'], scoring: ['Scoring guide', '評分指引'], why: ['Why this process', '為何屬於這個層次'],
   mark: ['mark', '分'], marks: ['marks', '分'], mc: ['Multiple choice', '選擇題'], cr: ['Constructed response', '開放題'],
   target: ['target', '目標'], copied: ['Copied to the clipboard.', '已複製到剪貼簿。'], copyFail: ['Could not copy — select the text and copy manually.', '無法自動複製，請自行選取文字複製。'],
+  warnOpts: ['not 4 options', '選項不是 4 個'], warnCrOpts: ['open item with options', '開放題卻附選項'],
+  warnAns: ['answer matches no option', '答案對不上選項'], warnScoring: ['no scoring guide', '缺評分指引'],
+  warnPoints: ['stem does not say how many points', '題幹沒說要答幾點'],
+  countMismatch: ['The model returned {a} verdicts for {b} questions — check the pairing before you trust them.', '模型對 {b} 題只回了 {a} 條判斷——請先核對配對再採信。'],
   measures: ['Actually measures', '實際測的是'], textDep: ['Needs the passage', '須讀課文才能答'], answerable: ['Answerable from the passage', '課文足以作答'],
   issues: ['Problems', '問題'], rewriteL: ['Fixed version', '修訂版'], levelUp: ['One process higher', '提升一個層次'], suggested: ['Full-credit answer', '滿分答案要點'],
   yes: ['✓ yes', '✓ 是'], no: ['✗ no', '✗ 否'], notReading: ['This does not measure reading comprehension of this passage.', '此題並未測量本篇課文的閱讀理解。'],
@@ -320,8 +325,8 @@ const DEFAULT_GEN = `You are an experienced reading-assessment writer who builds
 THE FOUR PROCESSES
 1. Focus on and retrieve explicitly stated information. The answer is stated in the passage, usually within one sentence, in words close to the text.
 2. Make straightforward inferences. The reader joins two pieces of information that sit close together, or fills an obvious gap: a pronoun's referent, an immediate cause, a sequence, a character's obvious feeling.
-3. Interpret and integrate ideas and information. The reader draws on the whole text and on general world knowledge: the theme or message, how and why a character changes, comparing or contrasting two parts, the reason behind a choice, an alternative title, information that has to be gathered from different places.
-4. Evaluate and critique content and textual elements. The reader steps outside the text and judges it: the effect of a word choice, the structure, whether the evidence is sufficient, the author's stance or purpose, how a heading / caption / diagram / illustration works, what the author left out.
+3. Interpret and integrate ideas and information. The reader draws on the whole text and on general world knowledge: the theme or message, how and why a character changes, comparing or contrasting two parts, an alternative title, information that has to be gathered from different places. A reason or motive belongs here ONLY if it has to be assembled from separated parts of the text; if one local cause explains it, the item is process 2.
+4. Evaluate and critique content and textual elements. The reader steps outside the text and judges it: the effect of a word choice, the structure, whether the evidence is sufficient, the author's stance or purpose, how a heading / caption / diagram / illustration works, what the author left out. What is missing must be judged from the text's own purpose and evidence; never ask pupils to supply facts from outside the passage.
 
 RULES
 - Every item must be answerable by a careful reader of the stated grade using this passage alone. No outside knowledge, no trick items, nothing that depends on material the reader cannot see.
@@ -344,7 +349,7 @@ const DEFAULT_CHECK = `You are a reading-assessment adviser trained on the PIRLS
 THE FOUR PROCESSES
 1. Retrieve explicitly stated information (answer sits in one place in the text).
 2. Make straightforward inferences (join two nearby pieces of information, an obvious cause, a referent).
-3. Interpret and integrate ideas and information (whole-text: theme, character change, comparison, alternative title; cannot be answered from one sentence).
+3. Interpret and integrate ideas and information (whole-text: theme, character change, comparison, alternative title; cannot be answered from one sentence, and a motive counts only if it must be assembled from separated parts).
 4. Evaluate and critique content and textual elements (judge word choice, structure, evidence, stance, text features; still anchored in the text).
 
 FOR EACH QUESTION
@@ -491,7 +496,7 @@ async function callAI(system, user, statusEl) {
       } catch (e) { lastErr = new Error(e.name === 'AbortError' ? model + (L ? ' 90 秒內沒有回應' : ' did not answer within 90 s') : 'Network error: ' + e.message); clearTimeout(timer); continue; }
       clearTimeout(timer);
       if (r.ok && data.choices && data.choices[0]) {
-        const c = data.choices[0].message.content; const text = Array.isArray(c) ? c.map(p => p.text || '').join('') : (c || '');
+        const ch = data.choices[0]; const c = (ch.message && ch.message.content) ?? ch.text ?? ''; const text = Array.isArray(c) ? c.map(p => p.text || '').join('') : (c || '');
         const o = parseJSON(text); if (o) return o;
         lastErr = new Error(L ? '模型沒有回傳有效 JSON，再試一次。' : 'The model did not return valid JSON; trying again.'); continue;
       }
@@ -510,7 +515,7 @@ function parseJSON(text) {
 }
 
 // ---------- generate ----------
-let lastSet = null, lastCheck = null, lastTargets = null, lastTotal = 0;
+let lastSet = null, lastCheck = null, lastTargets = null, lastTotal = 0, reqSeq = 0;
 function targetCounts(n, w) {
   const raw = w.map(x => n * x / 100), base = raw.map(Math.floor);
   let left = n - base.reduce((a, b) => a + b, 0);
@@ -533,8 +538,10 @@ $('genBtn').addEventListener('click', async () => {
     'Number them 1 to ' + n + ' in the "n" field, ordered easiest process first where that is natural.\n' +
     'Return JSON only.';
   $('genBtn').disabled = true;
+  const my = ++reqSeq;
   try {
     const data = await callAI($('genPrompt').value, user, st);
+    if (my !== reqSeq) return;                                  // the teacher started another run: drop this answer
     const items = (Array.isArray(data.items) ? data.items : []).map(normItem).filter(Boolean);
     if (!items.length) { st.className = 'status err'; st.textContent = T.noItems[L]; return; }
     lastSet = { items, purpose: str(data.purpose), language: str(data.language) };
@@ -549,16 +556,28 @@ function normItem(raw, i) {
   const q = str(raw.question).trim(); if (!q) return null;
   let p = parseInt(raw.process, 10); if (!(p >= 1 && p <= 4)) p = 1;
   const options = Array.isArray(raw.options) ? raw.options.map(str).map(s => s.replace(/^\s*[A-Da-d][).、.]\s*/, '').trim()).filter(Boolean) : [];
-  const isMC = /mc|multiple|choice|選擇/i.test(str(raw.format)) ? options.length >= 2 : options.length >= 2;
+  const fmt = str(raw.format).toLowerCase();
+  const saysMC = /mc|multiple|choice|選擇|选择/.test(fmt), saysCR = /cr|constructed|open|short|extended|問答|问答|開放|开放/.test(fmt);
+  const isMC = saysMC ? options.length >= 2 : (saysCR ? false : options.length >= 2);   // the model's own label decides; options only settle it when there is no label
+  const warn = [];
+  if (saysMC && options.length !== 4) warn.push('Opts');
+  if (saysCR && options.length >= 2) warn.push('CrOpts');
   let marks = parseInt(raw.marks, 10); if (!(marks >= 1 && marks <= 3)) marks = 1;
   if (isMC) marks = 1;
+  const scoring = str(raw.scoring).trim();
   let ans = str(raw.answer).trim();
   if (isMC) {
-    const m = ans.match(/^\s*([A-Da-d])\b/);
-    const idx = m ? 'abcd'.indexOf(m[1].toLowerCase()) : options.findIndex(o => o && ans && o.toLowerCase() === ans.toLowerCase());
-    ans = (idx >= 0 && idx < options.length) ? 'ABCD'[idx] + '. ' + options[idx] : ans;
+    let idx = -1;
+    const m = ans.match(/^\s*([A-Da-d])\b/); if (m) idx = 'abcd'.indexOf(m[1].toLowerCase());
+    if (idx < 0) { const d = ans.match(/^\s*\(?([1-9])\)?\s*[).、.]?\s*$/); if (d) idx = +d[1] - 1; }        // some models answer with the option number
+    if (idx < 0) idx = options.findIndex(o => o && ans && o.toLowerCase() === ans.toLowerCase());
+    if (idx < 0) idx = options.findIndex(o => o && ans && (o.toLowerCase().startsWith(ans.toLowerCase()) || ans.toLowerCase().startsWith(o.toLowerCase())));
+    if (idx >= 0 && idx < options.length) ans = 'ABCD'[idx] + '. ' + options[idx]; else warn.push('Ans');
+  } else {
+    if (marks > 1 && !scoring) warn.push('Scoring');
+    if (marks > 1 && !/\b(two|three|2|3)\b|兩|两|三|二/.test(q)) warn.push('Points');   // a 2- or 3-mark item must tell pupils how many points to give
   }
-  return { n: parseInt(raw.n, 10) || (i + 1), process: p, mc: isMC, marks, question: q, options, answer: ans, scoring: str(raw.scoring).trim(), why: str(raw.why).trim() };
+  return { n: parseInt(raw.n, 10) || (i + 1), process: p, mc: isMC, marks, question: q, options, answer: ans, scoring, why: str(raw.why).trim(), warn };
 }
 function renderItems(set) {
   const items = set.items;
@@ -586,7 +605,8 @@ function renderItems(set) {
     return '<div class="item p' + p + (it.mc ? '' : ' cr') + '">' +
       '<div class="meta"><span class="badge proc b' + p + '">' + p + '. ' + esc(PROC[p].short[L]) + '</span>' +
       '<span class="badge fmt">' + esc(it.mc ? T.mc[L] : T.cr[L]) + '</span>' +
-      '<span class="badge">' + it.marks + ' ' + esc(it.marks === 1 ? T.mark[L] : T.marks[L]) + '</span></div>' +
+      '<span class="badge">' + it.marks + ' ' + esc(it.marks === 1 ? T.mark[L] : T.marks[L]) + '</span>' +
+      (it.warn || []).map(w => T['warn' + w] ? '<span class="badge warn">' + esc(T['warn' + w][L]) + '</span>' : '').join('') + '</div>' +
       '<p class="qtext"><span class="qno">' + (i + 1) + '.</span>' + esc(it.question) + '</p>' + opts +
       (key ? '<div class="keyblock keyonly">' + key + '</div>' : '') +
       (it.why ? '<div class="why keyonly"><b>' + esc(T.why[L]) + ':</b> ' + esc(it.why) + '</div>' : '') +
@@ -604,12 +624,16 @@ $('checkBtn').addEventListener('click', async () => {
   const user = 'PASSAGE:\n"""\n' + passage + '\n"""\n\nPupils: ' + $('grade').value + '.\n\nTEACHER’S QUESTIONS:\n' +
     qs.map((q, i) => (i + 1) + '. ' + q).join('\n') + '\n\nReturn JSON only, one entry per question, in the same order.';
   $('checkBtn').disabled = true;
+  const my = ++reqSeq;
   try {
     const data = await callAI($('checkPrompt').value, user, st);
+    if (my !== reqSeq) return;
     const items = (Array.isArray(data.items) ? data.items : []).filter(x => x && typeof x === 'object');
     if (!items.length) { st.className = 'status err'; st.textContent = T.noItems[L]; return; }
     lastCheck = items.map((x, i) => ({ ...x, question: str(x.question).trim() || qs[i] || '' }));
-    renderCheck(lastCheck); st.textContent = '';
+    renderCheck(lastCheck);
+    if (items.length !== qs.length) { st.className = 'status err'; st.textContent = T.countMismatch[L].replace('{a}', items.length).replace('{b}', qs.length); }
+    else st.textContent = '';
   } catch (e) { st.className = 'status err'; st.textContent = e.message; }
   finally { $('checkBtn').disabled = false; }
 });

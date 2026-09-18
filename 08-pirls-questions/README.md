@@ -1,8 +1,8 @@
 # Prototype 8 — PIRLS Question Generator 閱讀理解出題器 (item writing you can argue with)
 
-**What it does:** you paste a reading passage, choose the grade and the language, and the tool writes a whole question set to the **PIRLS 2021** design — the four comprehension processes in their official proportions (20 / 30 / 30 / 20), multiple-choice and constructed-response items mixed as PIRLS mixes them, marks, answer keys, scoring guides (full / partial / no credit), and for every item one line saying **why it belongs to that process**. A coverage panel shows what you actually got against what you asked for, so a set that quietly collapsed into ten retrieval questions is visible in one glance. Two print buttons give you a **student sheet** (title, name line, total marks, passage, questions, answer lines — no answers, no process labels) and an **answer key** (everything, passage removed).
+**What it does:** you paste a reading passage, choose the grade and the language, and the tool writes a whole question set to the **PIRLS 2021** design — the four comprehension processes in their official proportions (20 / 30 / 30 / 20), multiple-choice and constructed-response items in a mix you choose, marks, answer keys, scoring guides (full / partial / no credit), and for every item one line saying **why it belongs to that process**. A coverage panel shows what you actually got against what you asked for, so a set that quietly collapsed into ten retrieval questions is visible in one glance — but it counts the labels *the model gave its own items*, it does not verify them. Items whose parts do not add up (an MC item without four options, an answer that matches no option, a 3-mark item whose stem never says how many points, a missing scoring guide) carry a red flag on the card. Two print buttons give you a **student sheet** (title, name line, total marks, passage, questions, answer lines — no answers, no process labels) and an **answer key** (everything, passage removed).
 
-The second tab, **Check my own question**, is the reverse move: paste questions *you* wrote, and the tool says which process each one really measures (not the one you hoped for), whether a reader could answer it from this passage at all, what is wrong with it, a repaired version, and a version one process higher. Interface and questions both work in **English, 繁體中文 and 简体中文**; the 中/English button in the header switches the whole interface.
+The second tab, **Check my own question**, is the reverse move: paste questions *you* wrote, and the tool says which process each one really measures (not the one you hoped for), whether a reader could answer it from this passage at all, what is wrong with it, a repaired version, and a version one process higher. The **interface** is English or 繁體中文 (the 中/English button switches all of it); the **questions** can be written in English, 繁體中文 or 简体中文, independently of the interface.
 
 **Tool used:** one HTML file (≈660 lines). Any OpenAI-compatible API (default: OpenRouter free models, which work from Hong Kong). No server, no install, no framework, works from `file://`.
 
@@ -30,7 +30,7 @@ The key is stored only in your browser (localStorage). The file never contains a
 | 3. Interpret and integrate ideas and information 詮釋整合 | 30% | use the whole text: theme, character change, comparison |
 | 4. Evaluate and critique content and textual elements 評價批判 | 20% | judge word choice, structure, evidence, stance, text features |
 
-MC items are worth 1 mark; CR items 1, 2 or 3 marks. The *Process weights* menu also offers an even split and a higher-order split (10 / 20 / 35 / 35) — useful for showing a class how the shape of a paper changes what it measures.
+MC items are worth 1 mark; CR items 1, 2 or 3 marks. PIRLS uses both formats; the *Item format mix* menu here is your choice, not an official PIRLS blueprint. The *Process weights* menu also offers an even split and a higher-order split (10 / 20 / 35 / 35) — useful for showing a class how the shape of a paper changes what it measures.
 
 ## Make it yours
 
@@ -41,6 +41,7 @@ MC items are worth 1 mark; CR items 1, 2 or 3 marks. The *Process weights* menu 
 
 ## Known limits (good discussion material)
 
+- **The coverage panel counts claims, not verified classifications.** The percentages tell you what the model *said* it wrote. The only check on that is you, reading the *why* line.
 - **The process labels are claims, not facts.** Process 3 and 4 are where models cheat: a process 2 item arrives wearing a "4" badge. That is exactly what the *why* line is for — read it, and if it does not survive one question from you, the label is wrong.
 - **Nothing here is validated.** Real PIRLS items are trialled on hundreds of pupils and double-marked. Do not report a pupil's "PIRLS level" from this tool; use it to build classroom items and to train your own eye.
 - **The passage is the ceiling.** A thin passage cannot support a process 4 item, and the model will invent one anyway. Choose passages with a stance, a structure or a text feature (heading, caption, diagram) if you want real higher-order items.
