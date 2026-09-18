@@ -1,25 +1,38 @@
-/* Selected practice words composed from the public Grade 1 Units 1–2 character scope.
-   This is not the complete textbook word list. Stories and question design are original. */
+/* Complete shared character and word library, grouped into short replayable lessons. */
 (function(root){
-const raw=[
-['eyes','眼睛','眼睛','尋找森林的光','翠光森林','把明亮的字找回來，點亮森林裡的小燈。','👁',[
- ['眼睛','眼睛','yǎn jing','eyes','👀'],['上','上','shàng','up','⬆️'],['下','下','xià','down','⬇️'],['中間','中间','zhōng jiān','middle','↔️'],['嘴','嘴','zuǐ','mouth','👄'],['鼻子','鼻子','bí zi','nose','👃'],['葡萄','葡萄','pú tao','grapes','🍇'],['黑','黑','hēi','black','⚫']]],
-['ears','耳朵','耳朵','聽見山谷的祕密','回聲山谷','小龍把方向弄混了。用字詞幫牠找到路。','♪',[
- ['耳朵','耳朵','ěr duo','ears','👂'],['左','左','zuǒ','left','⬅️'],['右','右','yòu','right','➡️'],['山','山','shān','mountain','⛰️'],['兩','两','liǎng','two','✌️'],['看','看','kàn','look','👀'],['前','前','qián','front',''],['後','后','hòu','behind','']]],
-['hands','手','手','小小毛筆的力量','巧手石橋','帶著你的毛筆，喚醒石橋上的字靈。','✋',[
- ['手','手','shǒu','hand','✋'],['腳','脚','jiǎo','foot','🦶'],['頭','头','tóu','head',''],['朋友','朋友','péng you','friend','🤝'],['你','你','nǐ','you',''],['我','我','wǒ','I / me',''],['大','大','dà','big',''],['小','小','xiǎo','small','']]],
-['radish','蘿蔔','萝卜','彩色花園的訪客','彩光花園','花園的顏色躲起來了，一起把它們找回來。','✿',[
- ['蘿蔔','萝卜','luó bo','radish',''],['紅','红','hóng','red','🔴'],['綠','绿','lǜ','green','🟢'],['黃','黄','huáng','yellow','🟡'],['藍','蓝','lán','blue','🔵'],['公雞','公鸡','gōng jī','rooster','🐓'],['尾巴','尾巴','wěi ba','tail',''],['地','地','dì','ground','']]],
-['peanut','花生','花生','花生屋的好朋友','花生小屋','森林裡的小伙伴，準備了一份小小的驚喜。','⌂',[
- ['花生','花生','huā shēng','peanut','🥜'],['花','花','huā','flower','🌸'],['白','白','bái','white','⚪'],['坐','坐','zuò','sit','🪑'],['立','立','lì','stand',''],['走','走','zǒu','walk','🚶'],['睡','睡','shuì','sleep','💤'],['裡面','里面','lǐ miàn','inside','']]],
-['village','一去二三里','一去二三里','通往雲上的小路','雲上小村','沿著山路數一數，找到雲上的村莊。','☁',[
- ['一','一','yī','one','1️⃣'],['二','二','èr','two','2️⃣'],['三','三','sān','three','3️⃣'],['四','四','sì','four','4️⃣'],['六','六','liù','six','6️⃣'],['門','门','mén','door','🚪'],['樹','树','shù','tree','🌳'],['路','路','lù','road','']]],
-['count','算一算','算一算','字靈之森的約定','星光樹屋','最後一個小冒險！和小龍一起守護字靈之森。','✦',[
- ['鳥','鸟','niǎo','bird','🐦'],['飛','飞','fēi','fly',''],['加','加','jiā','add','➕'],['減','减','jiǎn','subtract','➖'],['幾','几','jǐ','how many',''],['多','多','duō','many',''],['少','少','shǎo','few',''],['算','算','suàn','calculate','🧮']]]
+const V=typeof module!=='undefined'&&module.exports?require('./shared-vocabulary.js'):root.SharedHanziVocabulary;
+const lessonRows=[
+ [1,1,'眼睛','眼睛'],[1,1,'耳朵','耳朵'],[1,1,'手','手'],[1,1,'蘿蔔','萝卜'],[1,1,'花生','花生'],[1,1,'一去二三里','一去二三里'],[1,1,'算一算','算一算'],
+ [1,2,'雨','雨'],[1,2,'鏡子','镜子'],[1,2,'袋鼠','袋鼠'],[1,2,'畫','画'],[1,2,'小蝌蚪','小蝌蚪'],[1,2,'彎彎的月亮','弯弯的月亮'],[1,2,'一頭牛','一头牛'],
+ [1,3,'小山羊','小山羊'],[1,3,'種魚','种鱼'],[1,3,'落葉','落叶'],[1,3,'下雪的時候','下雪的时候'],[1,3,'烏鴉喝水','乌鸦喝水'],[1,3,'小猴子下山','小猴子下山'],
+ [2,1,'撈月亮','捞月亮'],[2,1,'白菜的故事','白菜的故事'],[2,1,'小貓釣魚','小猫钓鱼'],[2,1,'狐狸和烏鴉','狐狸和乌鸦'],
+ [2,2,'一粒種子','一粒种子'],[2,2,'謎語','谜语'],[2,2,'美麗的公雞','美丽的公鸡'],[2,2,'埋蛇的孩子','埋蛇的孩子'],[2,2,'駱駝和羊','骆驼和羊'],
+ [2,3,'小弟和小貓','小弟和小猫'],[2,3,'小壁虎借尾巴','小壁虎借尾巴'],[2,3,'植物媽媽有辦法','植物妈妈有办法'],[2,3,'鐵棒磨成針','铁棒磨成针']
 ];
-raw.push(...[["rain", "雨", "雨", "找回天空的雨滴", "雨滴小徑", "聽清楚天氣的字，讓森林重新喝到水。", "☂", [["雨", "雨", "yǔ", "rain", "🌧️"], ["水", "水", "shuǐ", "water", "💧"], ["風", "风", "fēng", "wind", ""], ["雲", "云", "yún", "cloud", "☁️"], ["雪", "雪", "xuě", "snow", "❄️"], ["千", "千", "qiān", "thousand", ""], ["萬", "万", "wàn", "ten thousand", ""], ["線", "线", "xiàn", "thread / line", ""]]], ["mirror", "鏡子", "镜子", "鏡子裡的笑臉", "明鏡湖畔", "幫小龍讀懂鏡子裡的表情。", "◇", [["鏡子", "镜子", "jìng zi", "mirror", "🪞"], ["哭", "哭", "kū", "cry", "😢"], ["笑", "笑", "xiào", "smile", "😊"], ["臉", "脸", "liǎn", "face", ""], ["髒", "脏", "zāng", "dirty", ""], ["爸爸", "爸爸", "bà ba", "dad", ""], ["媽媽", "妈妈", "mā ma", "mom", ""], ["知道", "知道", "zhī dào", "know", ""]]], ["kangaroo", "袋鼠", "袋鼠", "袋鼠的神奇口袋", "口袋草原", "找出袋鼠口袋裡藏著的字詞。", "☆", [["袋鼠", "袋鼠", "dài shǔ", "kangaroo", "🦘"], ["奇怪", "奇怪", "qí guài", "strange", ""], ["娃娃", "娃娃", "wá wa", "doll", "🪆"], ["爬", "爬", "pá", "crawl", ""], ["米", "米", "mǐ", "rice", "🍚"], ["田", "田", "tián", "field", ""], ["石", "石", "shí", "stone", "🪨"], ["木", "木", "mù", "wood", "🪵"]]], ["painting", "畫", "画", "畫裡的春天", "春色畫橋", "讀一讀遠近與聲音，打開春天的畫。", "✿", [["畫", "画", "huà", "painting", "🖼️"], ["遠", "远", "yuǎn", "far", ""], ["近", "近", "jìn", "near", ""], ["色", "色", "sè", "color", ""], ["聽", "听", "tīng", "listen", "👂"], ["聲", "声", "shēng", "sound", ""], ["春", "春", "chūn", "spring", "🌱"], ["人", "人", "rén", "person", ""]]], ["tadpole", "小蝌蚪", "小蝌蚪", "小蝌蚪的變身", "青蛙池塘", "認出身體與衣服的字，陪小蝌蚪長大。", "≈", [["蝌蚪", "蝌蚪", "kē dǒu", "tadpole", ""], ["青蛙", "青蛙", "qīng wā", "frog", "🐸"], ["衣服", "衣服", "yī fu", "clothes", "👕"], ["褲子", "裤子", "kù zi", "pants", "👖"], ["腿", "腿", "tuǐ", "leg", "🦵"], ["腦", "脑", "nǎo", "brain", "🧠"], ["變", "变", "biàn", "change", ""], ["換", "换", "huàn", "change / replace", ""]]], ["moon", "小小的船", "小小的船", "月亮上的小船", "月光星河", "在星空中認字，找到彎彎的小船。", "☾", [["月亮", "月亮", "yuè liang", "moon", "🌙"], ["船", "船", "chuán", "boat", "⛵"], ["彎", "弯", "wān", "curved", ""], ["尖", "尖", "jiān", "pointed", ""], ["星", "星", "xīng", "star", "⭐"], ["天", "天", "tiān", "sky", ""], ["日", "日", "rì", "sun", "☀️"], ["火", "火", "huǒ", "fire", "🔥"]]], ["cow", "一頭牛", "一头牛", "草地上的動物朋友", "百草牧場", "認識動物與數量，和小龍完成第二冊冒險。", "♧", [["牛", "牛", "niú", "cow", "🐄"], ["馬", "马", "mǎ", "horse", "🐎"], ["羊", "羊", "yáng", "sheep", "🐑"], ["鴨", "鸭", "yā", "duck", "🦆"], ["桃", "桃", "táo", "peach", "🍑"], ["魚", "鱼", "yú", "fish", "🐟"], ["蟲", "虫", "chóng", "insect", "🐛"], ["草", "草", "cǎo", "grass", "🌿"]]]]);
-const chapters=raw.map((r,i)=>({id:r[0],title:r[1],simpleTitle:r[2],story:r[3],place:r[4],description:r[5],icon:r[6],number:i+1,book:i<7?1:2,lesson:i%7+1,weeks:(i<7?["1","2","3–4","5","6","7","8"]:["1","2","3","4","5–6","7","8"])[i%7],alias:r[0]==="moon"?"彎彎的月亮 / 弯弯的月亮":"",words:r[7].map((w,j)=>({id:r[0]+'-'+j,traditional:w[0],simplified:w[1],pinyin:w[2],meaning:w[3],emoji:w[4]}))}));
-chapters.forEach((c,i)=>{c.reviewWords=chapters.slice(0,i+1).flatMap(ch=>ch.words);});
-const curriculum={chapters,words:chapters.flatMap(c=>c.words),source:'https://mlpchinese.com/static/common/pdf/01-shengzi.pdf',version:2};
+const legacy={
+ '1-1-1':['eyes','尋找森林的光','翠光森林','把明亮的字找回來，點亮森林裡的小燈。','👁','1'],
+ '1-1-2':['ears','聽見山谷的祕密','回聲山谷','小龍把方向弄混了。用字詞幫牠找到路。','♪','2'],
+ '1-1-3':['hands','小小毛筆的力量','巧手石橋','帶著你的毛筆，喚醒石橋上的字靈。','✋','3–4'],
+ '1-1-4':['radish','彩色花園的訪客','彩光花園','花園的顏色躲起來了，一起把它們找回來。','✿','5'],
+ '1-1-5':['peanut','花生屋的好朋友','花生小屋','森林裡的小伙伴，準備了一份小小的驚喜。','⌂','6'],
+ '1-1-6':['village','通往雲上的小路','雲上小村','沿著山路數一數，找到雲上的村莊。','☁','7'],
+ '1-1-7':['count','字靈之森的約定','星光樹屋','和小龍一起守護字靈之森。','✦','8'],
+ '1-2-1':['rain','找回天空的雨滴','雨滴小徑','聽清楚天氣的字，讓森林重新喝到水。','☂','1'],
+ '1-2-2':['mirror','鏡子裡的笑臉','明鏡湖畔','幫小龍讀懂鏡子裡的表情。','◇','2'],
+ '1-2-3':['kangaroo','袋鼠的神奇口袋','口袋草原','找出袋鼠口袋裡藏著的字詞。','☆','3'],
+ '1-2-4':['painting','畫裡的春天','春色畫橋','讀一讀遠近與聲音，打開春天的畫。','✿','4'],
+ '1-2-5':['tadpole','小蝌蚪的變身','青蛙池塘','認出身體與衣服的字，陪小蝌蚪長大。','≈','5–6'],
+ '1-2-6':['moon','月亮上的小船','月光星河','在星空中認字，找到彎彎的小船。','☾','7'],
+ '1-2-7':['cow','草地上的動物朋友','百草牧場','認識動物與數量，完成這個單元的冒險。','♧','8']
+};
+const lessonNumber={};
+const chapters=lessonRows.map((row,index)=>{
+ const [grade,unit,title,simpleTitle]=row,keyBase=`${grade}-${unit}`,lesson=(lessonNumber[keyBase]||0)+1;lessonNumber[keyBase]=lesson;
+ const key=`${grade}-${unit}-${lesson}`,meta=legacy[key]||[`g${grade}-u${unit}-l${lesson}`,`第 ${lesson} 課的字靈試煉`,`第 ${unit} 單元秘境`,`每次練習 8 個本課字詞，重玩會輪換未練內容。`,'✦',''];
+ const words=V.items.filter(w=>w.grade===grade&&w.unit===unit&&w.lesson===lesson);
+ return{id:meta[0],grade,unit,book:unit,lesson,title,simpleTitle,story:meta[1],place:meta[2],description:meta[3],icon:meta[4],weeks:meta[5],alias:key==='1-2-6'?'小小的船':'',number:index+1,practiceSize:8,words};
+});
+chapters.forEach((c,i)=>{c.reviewWords=chapters.slice(0,i).flatMap(ch=>ch.words);});
+const curriculum={chapters,words:V.items,counts:V.counts,sources:V.sources,version:3};
 if(typeof module!=='undefined'&&module.exports)module.exports=curriculum;else root.Curriculum=curriculum;
 })(typeof window!=='undefined'?window:globalThis);

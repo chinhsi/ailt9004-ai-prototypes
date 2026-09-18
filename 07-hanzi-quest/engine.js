@@ -8,6 +8,7 @@ const syllables=w=>w.pinyin.trim().split(/\s+/).length;
 const sameLength=(a,b)=>Array.from(a.traditional).length===Array.from(b.traditional).length&&syllables(a)===syllables(b);
 function toneChoices(word){const marks=['̄','́','̌','̀'];const decomposed=word.pinyin.normalize('NFD');const mark=marks.find(m=>decomposed.includes(m));if(!mark)return [];return marks.filter(m=>m!==mark).map((m,i)=>({...word,id:word.id+'-tone-'+i,pinyin:decomposed.replace(mark,m).normalize('NFC')}));}
 function shuffle(arr,random=Math.random){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function practiceWords(chapter,progress){const size=Math.min(chapter.practiceSize||8,chapter.words.length),wins=Math.max(0,Number(progress?.chapters?.[chapter.id]?.wins)||0),start=chapter.words.length?wins*size%chapter.words.length:0;return Array.from({length:size},(_,i)=>chapter.words[(start+i)%chapter.words.length]);}
 function freshProgress(){return{version:1,xp:0,inventory:{eliminate:2,clue:2,learn:2},chapters:{},words:{},sessions:0,settings:{script:'traditional',mode:'mixed',questionVersion:2,options:2,rate:1,voice:'neural-xiaoxiao-v1',speechVersion:1,sound:true}};}
 function sanitizeProgress(value){const p=freshProgress();if(!value||typeof value!=='object')return p;
  if(value.settings){const s=value.settings;if(['traditional','simplified'].includes(s.script))p.settings.script=s.script;if([...MODES,'mixed'].includes(s.mode))p.settings.mode=s.mode;if([2,3,4].includes(s.options))p.settings.options=s.options;if([.7,.85,1].includes(s.rate))p.settings.rate=s.rate;if(typeof s.voice==='string')p.settings.voice=s.voice;if(typeof s.sound==='boolean')p.settings.sound=s.sound;if(s.speechVersion!==1){p.settings.voice='neural-xiaoxiao-v1';p.settings.rate=1;}p.settings.speechVersion=1;if(s.questionVersion!==2&&s.mode==='listen')p.settings.mode='mixed';p.settings.questionVersion=2;}
@@ -17,20 +18,20 @@ function sanitizeProgress(value){const p=freshProgress();if(!value||typeof value
  for(const [k,v]of Object.entries(value.chapters||{})){if(!['__proto__','constructor','prototype'].includes(k)&&v&&typeof v==='object')p.chapters[k]={wins:Math.max(0,Number(v.wins)||0),stars:Math.min(3,Math.max(0,Number(v.stars)||0)),rewardClaims:count(v.rewardClaims===undefined?Math.min(99,(Number(v.wins)||0)*2):v.rewardClaims)};}
  for(const [k,v]of Object.entries(value.words||{})){if(['__proto__','constructor','prototype'].includes(k)||!v||typeof v!=='object')continue;const entry={seen:Math.max(0,Number(v.seen)||0),mistakes:Math.max(0,Number(v.mistakes)||0),modes:{}};for(const m of MODES){const x=v.modes?.[m];if(x)entry.modes[m]={independent:Math.max(0,Number(x.independent)||0),sessions:Array.isArray(x.sessions)?x.sessions.filter(s=>typeof s==='string').slice(-30):[]};}p.words[k]=entry;}return p;}
 class Battle{
- constructor(chapter,settings={},progress=freshProgress(),random=Math.random){if(!chapter?.words?.length)throw Error('Unknown chapter');this.chapter=chapter;this.settings={...freshProgress().settings,...settings};this.progress=progress;this.random=random;this.sessionId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9);this.heroHp=100;this.enemyHp=100;this.wave=1;this.energy=0;this.phase='answer';this.turn=0;this.correct=0;this.mistakes=0;this.rescues=0;this.hints=0;this.done=false;this.recorded=false;this.defeated=false;this.rewardedWaves=new Set();this.reward=null;this.earnedXp=0;this.retryIds=new Set();this.results=[];this.queue=shuffle(chapter.words,random);this.targetIds=new Set(chapter.words.map(w=>w.id));
+ constructor(chapter,settings={},progress=freshProgress(),random=Math.random){if(!chapter?.words?.length)throw Error('Unknown chapter');this.chapter=chapter;this.settings={...freshProgress().settings,...settings};this.progress=progress;this.random=random;this.sessionId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9);this.heroHp=100;this.enemyHp=100;this.wave=1;this.energy=0;this.phase='answer';this.turn=0;this.correct=0;this.mistakes=0;this.rescues=0;this.hints=0;this.done=false;this.recorded=false;this.defeated=false;this.rewardedWaves=new Set();this.reward=null;this.earnedXp=0;this.retryIds=new Set();this.results=[];const prior=progress.chapters[chapter.id]||{};this.targetWords=practiceWords(chapter,progress);this.queue=shuffle(this.targetWords,random);this.targetIds=new Set(this.targetWords.map(w=>w.id));
  const old=shuffle((chapter.reviewWords||[]).filter(w=>!this.targetIds.has(w.id)),random);
  old.sort((a,b)=>{const score=w=>{const r=progress.words[w.id];return r?(r.mistakes&&!mastered(r)?3:!mastered(r)?2:1):0;};return score(b)-score(a);});
  this.reviewTargets=old.slice(0,2);this.reviewTargets.forEach((w,i)=>this.queue.splice(3+i*4,0,w));this.plannedCount=this.queue.length;
- const prior=progress.chapters[chapter.id]||{};const repeats=Math.max(prior.wins||0,Math.floor((prior.rewardClaims||0)/2));this.rewardRate=repeats===0?1:repeats===1?.6:.3;
+ const repeats=Math.max(prior.wins||0,Math.floor((prior.rewardClaims||0)/2));this.rewardRate=repeats===0?1:repeats===1?.6:.3;
  this.weapon=weapon(experience(progress).level);this.baseMonsterLevel=1+Math.min(3,Math.floor((chapter.number-1)/4))+Math.min(2,Math.floor((experience(progress).level-1)/4));this.setupEnemy();this.nextQuestion();}
  setupEnemy(){this.monsterLevel=Math.max(1,this.baseMonsterLevel-(this.wave===1?1:0));this.enemyMaxHp=100+(this.monsterLevel-1)*10;this.enemyHp=this.enemyMaxHp;}
  revisit(word){if(!this.retryIds.has(word.id)){this.retryIds.add(word.id);this.queue.splice(Math.min(2,this.queue.length),0,word);}}
  get word(){return this.question.word;}
  nextQuestion(){if(this.done)return;let word=this.queue.shift();if(!word){if(this.defeated){this.phase='won';this.done=true;return;}word=this.chapter.words[this.turn%this.chapter.words.length];}
- this.turn++;const mode=this.settings.mode==='mixed'?MIXED_MODES[(this.turn-1)%MIXED_MODES.length]:this.settings.mode;
+ this.turn++;const requestedMode=this.settings.mode==='mixed'?MIXED_MODES[(this.turn-1)%MIXED_MODES.length]:this.settings.mode,mode=requestedMode==='meaning'&&!word.hasMeaning?'pinyin':requestedMode;
  const field=mode==='pinyin'?'pinyin':mode==='meaning'?'meaning':this.settings.script;
  const seen=new Set([word[field]]);
- const bank=this.chapter.reviewWords||this.chapter.words;
+ const bank=[...this.chapter.words,...(this.chapter.reviewWords||[])];
  const candidates=shuffle(bank.filter(w=>w.id!==word.id&&(mode==='meaning'||sameLength(w,word))&&(!['listen','read'].includes(mode)||w.pinyin!==word.pinyin)),this.random);
  // Include a close tone contrast in pinyin questions; all distractors keep the same syllable count.
  const pool=mode==='pinyin'?[...shuffle(toneChoices(word),this.random),...candidates]:candidates;
@@ -74,5 +75,5 @@ class Battle{
 }
 function experience(p){const xp=p.xp||0;return{xp,level:Math.floor(xp/100)+1,current:xp%100,needed:100};}
 function mastered(entry){return !!entry&&Object.values(entry.modes||{}).some(m=>new Set(m.sessions).size>=2);}
-const api={Battle,shuffle,freshProgress,sanitizeProgress,mastered,MODES,MIXED_MODES,sameLength,toneChoices,experience,weapon,ITEMS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.QuestEngine=api;
+const api={Battle,shuffle,practiceWords,freshProgress,sanitizeProgress,mastered,MODES,MIXED_MODES,sameLength,toneChoices,experience,weapon,ITEMS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.QuestEngine=api;
 })(typeof window!=='undefined'?window:globalThis);
