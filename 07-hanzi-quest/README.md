@@ -1,5 +1,7 @@
 # 07 — 字靈冒險 Hanzi Quest
 
+The public version uses an original bright monster-collecting RPG presentation: explore a route, meet wild 字靈, build a 字靈圖鑑, and grow a companion through Chinese practice. Its creatures, scene art, names, interface, and story are original and are not affiliated with or copied from a commercial game franchise.
+
 A Chinese vocabulary battle game for heritage-language learners. Read, listen, choose an answer, earn energy, defeat friendly fantasy monsters, and level up.
 
 **Play:** <https://chinhsi.github.io/ailt9004-ai-prototypes/07-hanzi-quest/>
