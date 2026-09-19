@@ -292,6 +292,10 @@ const T = {
   resetPrompts: ['Reset both prompts to default', '兩段提示語還原預設'],
   limHead: ['What this tool cannot do', '這個工具做不到的事'],
   needPassage: ['Paste a passage first (at least 80 characters).', '請先貼上課文（至少 80 字元）。'],
+  needKey: ['Please paste your API key in Settings (free key: openrouter.ai/keys).', '請先在「設定」貼上 API 金鑰（免費金鑰：openrouter.ai/keys）。'],
+  badKey: ['That API key was rejected. Check it at openrouter.ai/keys, or paste it again without spaces.', '這把金鑰被拒絕了。請到 openrouter.ai/keys 核對，或重貼一次（注意別夾到空白）。'],
+  allFailed: ['every model in the list failed. Free models are shared and are often overloaded at peak hours: wait a minute and press the button again, or put a different :free model first in Settings.', '清單上的模型全部失敗。免費模型是大家共用的，尖峰時段常塞車：等一分鐘再按一次，或在「設定」把另一個 :free 模型排到最前面。'],
+  oneFailed: ['add a second and third model to the list in Settings, separated by commas, so the page can fall back when one is overloaded.', '請在「設定」的模型欄用逗號多加第二、第三個模型，塞車時本頁才能自動換手。'],
   needQuestions: ['Type at least one question.', '請至少輸入一題。'],
   working: ['Writing items…', '正在出題…'], checking: ['Checking…', '正在檢核…'],
   doneItem: ['item', '題'], doneItems: ['items', '題'], doneMarks: ['marks in total', '分（總分）'],
@@ -480,34 +484,51 @@ function updateCount() {
 const unpaid = new Set();
 async function callAI(system, user, statusEl) {
   const key = $('apiKey').value.trim();
-  if (!key) throw new Error(L ? '請先在「設定」貼上 API 金鑰（免費金鑰：openrouter.ai/keys）。' : 'Please paste your API key in Settings (free key: openrouter.ai/keys).');
+  if (!key) throw new Error(T.needKey[L]);
   const base = $('baseUrl').value.trim().replace(/\/+$/, '');
   const models = $('model').value.split(',').map(m => m.trim()).filter(Boolean);
-  let lastErr = null;
+  const say = t => { if (statusEl) statusEl.textContent = t; };
+  let lastErr = null, tried = 0;
   for (const model of models) {
     if (unpaid.has(model)) continue;
+    tried++;
     for (let attempt = 0; attempt < 2; attempt++) {
-      if (statusEl) statusEl.textContent = (L ? '正在請 ' : 'Working with ') + model + '…';
+      say((L ? '正在請 ' : 'Working with ') + model + (attempt ? (L ? '（重試）' : ' (retry)') : '') + '\u2026');
       let r, data;
       const ac = new AbortController(); const timer = setTimeout(() => ac.abort(), 90000);   // long passages + 15 items: 90 s cap
       try {
         r = await fetch(base + '/chat/completions', { method: 'POST', signal: ac.signal, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key, 'X-Title': 'PIRLS Question Generator (AILT9004)' },
           body: JSON.stringify({ model, temperature: 0.5, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }) });
         data = await r.json().catch(() => ({}));
-      } catch (e) { lastErr = new Error(e.name === 'AbortError' ? model + (L ? ' 90 秒內沒有回應' : ' did not answer within 90 s') : 'Network error: ' + e.message); clearTimeout(timer); continue; }
+      } catch (e) {
+        clearTimeout(timer);
+        lastErr = new Error(model + ': ' + (e.name === 'AbortError' ? (L ? '90 秒內沒有回應' : 'no answer within 90 s') : 'network error, ' + e.message));
+        continue;
+      }
       clearTimeout(timer);
-      if (r.ok && data.choices && data.choices[0]) {
+      const usable = r.ok && !data.error && data.choices && data.choices[0];
+      if (usable) {
         const ch = data.choices[0]; const c = (ch.message && ch.message.content) ?? ch.text ?? ''; const text = Array.isArray(c) ? c.map(p => p.text || '').join('') : (c || '');
         const o = parseJSON(text); if (o) return o;
-        lastErr = new Error(L ? '模型沒有回傳有效 JSON，再試一次。' : 'The model did not return valid JSON; trying again.'); continue;
+        lastErr = new Error(model + ': ' + (L ? '沒有回傳有效 JSON' : 'did not return valid JSON'));
+        continue;
       }
-      lastErr = new Error((data.error && (data.error.message || data.error)) ? (data.error.message || JSON.stringify(data.error)) : 'HTTP ' + r.status);
-      if (r.status === 402 || r.status === 403 || /credit|insufficient|payment|region|billing/i.test(lastErr.message)) { unpaid.add(model); break; }
-      if (![429, 500, 502, 503, 404].includes(r.status)) throw lastErr;
-      await new Promise(res => setTimeout(res, 1500));
+      // An OpenAI-compatible endpoint may report an upstream provider failure as HTTP 200 with an error object,
+      // so never decide on the status code alone, and never give up while other models in the list are untried.
+      const e = data && data.error;
+      const msg = (e && (e.message || (typeof e === 'string' ? e : JSON.stringify(e)))) || ('HTTP ' + r.status);
+      lastErr = new Error(model + ': ' + msg);
+      if (r.status === 401 || /invalid api key|no auth|unauthori[sz]ed/i.test(msg)) throw new Error(T.badKey[L]);
+      if (r.status === 402 || r.status === 403 || /credit|insufficient|payment|billing|region|not available in your/i.test(msg)) { unpaid.add(model); break; }
+      const busy = [408, 409, 425, 429, 500, 502, 503, 504, 520, 522, 524].includes(r.status) ||
+        /overload|capacity|temporarily|busy|timeout|timed out|rate.?limit|upstream|try again|unavailable/i.test(msg);
+      if (!busy) break;                                   // a fault in this model (unknown name, bad request): move to the next one
+      if (attempt === 0) { say(model + (L ? ' 塞車，重試一次\u2026' : ' is busy, retrying once\u2026')); await new Promise(res => setTimeout(res, 1500)); }
     }
+    if (models.indexOf(model) < models.length - 1) say((L ? '換下一個模型\u2026 ' : 'Trying the next model\u2026 ') + (lastErr ? lastErr.message : ''));
   }
-  throw lastErr || new Error('No model available.');
+  const hint = tried > 1 ? T.allFailed[L] : T.oneFailed[L];
+  throw new Error((lastErr ? lastErr.message + ' \u2014 ' : '') + hint);
 }
 function parseJSON(text) {
   const t = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
