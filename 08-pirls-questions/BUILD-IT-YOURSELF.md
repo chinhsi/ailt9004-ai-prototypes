@@ -3,7 +3,7 @@
 Open a terminal in an empty folder, run `opencode`, and paste:
 
 ```
-Create a single self-contained file pirls-questions.html: a reading-comprehension item generator for teachers, built to the PIRLS 2021 Reading Comprehension framework, with a bilingual interface (English and 繁體中文).
+Create a single self-contained file pirls-questions.html: a reading-comprehension item generator for teachers, with a bilingual interface (English and 繁體中文) and TWO switchable frameworks: PIRLS 2021 (four comprehension processes, weights 20/30/30/20) and 祝新華's six levels of reading ability (複述, 解釋, 重整, 伸展, 評鑑, 創意; levels 1-2 lower, 3-6 higher; default weights 10/10/20/20/20/20 after the 50-mark test design used with that system). The framework picker swaps the level list, the weight options, the purpose/text-type menu, the teacher's reference table and both system prompts (the 祝新華 prompts are written in Chinese, since that is the language its terminology lives in), and it clears any results produced under the other framework.
 
 Requirements:
 - Settings panel: API key (password field, saved in localStorage), base URL (default https://openrouter.ai/api/v1), comma-separated model list (default "inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"). The key is stored only in localStorage and is sent only as an Authorization header to the endpoint the teacher chose.
