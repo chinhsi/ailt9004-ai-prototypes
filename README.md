@@ -13,6 +13,7 @@ Everything here works from **Hong Kong without a VPN** and uses **free** service
 | 5 | [**Picture Talk 看圖說話**](05-picture-talk/) | A game: the AI hides a sentence, draws it, you describe the picture, the AI marks content and gives one tip; streaks and best score | One HTML file + OpenRouter free models + Pollinations + browser speech (optional) | ✅ [play](https://chinhsi.github.io/ailt9004-ai-prototypes/05-picture-talk/picture-talk.html) |
 | 6 | [**认字乐园 Hanzi Game**](06-hanzi-game/) | Phone-first Chinese character game: six question types, spaced repetition (five boxes), real recorded voice, parent page — built by a coding assistant from a one-page teacher note | Vite + TypeScript + tests (source private; brief, build story and live game here) | ✅ [play](https://chinhsi.github.io/hanzi-game-pages/) |
 | 7 | [**字靈冒險 Hanzi Quest**](07-hanzi-quest/) | Chinese word battles: rotating listening/pinyin questions, whole-word audio, skills, monster rewards and character levels; browser-local progress | Static HTML/CSS/JavaScript + packaged audio; no key or live AI service | ✅ [play](https://chinhsi.github.io/ailt9004-ai-prototypes/07-hanzi-quest/) |
+| 8 | [**PIRLS Question Generator 閱讀理解出題器**](08-pirls-questions/) | Paste a reading passage, get a question set built to the four PIRLS comprehension processes: marks, answer keys, scoring guides, two teacher lines per item (why this process, why *not* the neighbouring one), a coverage panel, and printable student sheet / answer key. A second tab tells you what questions *you* wrote actually measure | One HTML file + OpenRouter free models; interface in English or 繁體中文 | ✅ [open](https://chinhsi.github.io/ailt9004-ai-prototypes/08-pirls-questions/pirls-questions.html) |
 
 ## Try Irony Mirror now (no download)
 
@@ -21,6 +22,10 @@ Everything here works from **Hong Kong without a VPN** and uses **free** service
 **Picture Talk:** <https://chinhsi.github.io/ailt9004-ai-prototypes/05-picture-talk/picture-talk.html> — same keys; choose language, level and theme, press Start. [05-picture-talk/README.md](05-picture-talk/README.md).
 
 **Hanzi Game:** <https://chinhsi.github.io/hanzi-game-pages/> — no key needed; read [06-hanzi-game/README.md](06-hanzi-game/README.md) for the brief that built it.
+
+## For teachers writing a reading test
+
+**PIRLS Question Generator:** <https://chinhsi.github.io/ailt9004-ai-prototypes/08-pirls-questions/pirls-questions.html> — paste a passage (or load one of the four samples), paste your free OpenRouter key in Settings, and generate a whole question set to the PIRLS 2021 design. Read the coverage panel before the items: it counts the labels *the model gave its own items*, it does not verify them. Shared with MEDD8934 Week 4. [08-pirls-questions/README.md](08-pirls-questions/README.md).
 
 ## Try Speaking Pal now (no download)
 
