@@ -42,7 +42,7 @@
   <section id="settings">
     <div class="row"><label>AI provider</label>
       <select id="provider">
-        <option value="https://openrouter.ai/api/v1|deepseek/deepseek-v4-flash-0731:free, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">OpenRouter (free models, works in Hong Kong)</option>
+        <option value="https://openrouter.ai/api/v1|qwen/qwen3.8-27b:free, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">OpenRouter (free models, works in Hong Kong)</option>
         <option value="custom|">Custom OpenAI-compatible endpoint</option>
       </select></div>
     <div class="row"><label>API key</label><input id="apiKey" type="password" placeholder="paste your key from openrouter.ai/keys"></div>
@@ -74,11 +74,11 @@
     <div class="row"><label>Scenario</label><input id="scenario" value="Ordering lunch at a cha chaan teng (茶餐廳)"></div>
     <div class="row"><label>Model preset</label>
       <select id="modelPreset">
-        <option value="deepseek/deepseek-v4-flash-0731:free, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">Free models (default — no credit needed)</option>
+        <option value="qwen/qwen3.8-27b:free, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">Free models (default — no credit needed)</option>
         <option value="qwen/qwen3-max, moonshotai/kimi-k2.6, deepseek/deepseek-v4-pro-0813, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">Premium models — Qwen / Kimi / DeepSeek (needs credit on your OpenRouter account; falls back to free)</option>
         <option value="">Custom (edit the list below)</option>
       </select></div>
-    <div class="row"><label>Model(s)</label><input id="model" value="deepseek/deepseek-v4-flash-0731:free, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"></div>
+    <div class="row"><label>Model(s)</label><input id="model" value="qwen/qwen3.8-27b:free, inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"></div>
     <p class="hint">Your key is stored only in this browser (localStorage). Never share the file with your key inside it. Voice input needs Chrome or Edge. Best Cantonese voices: Microsoft Edge ("… Online (Natural)" voices) or a "Google" voice in Chrome; Mac users can also install a Premium voice in System Settings → Accessibility → Spoken Content. Models: a comma-separated list, tried in order; busy, rate-limited or unpaid models are skipped automatically. Premium models cost about HK$0.01–0.03 per conversation turn. Hong Kong-billed accounts cannot use OpenAI/Anthropic/Google models on OpenRouter; the Premium preset uses Qwen, Kimi and DeepSeek instead.</p>
     <p style="margin:10px 0 0"><button class="act" id="start">Start conversation</button></p>
   </section>

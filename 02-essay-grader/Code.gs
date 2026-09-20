@@ -12,7 +12,7 @@
  */
 
 const BASE_URL = 'https://openrouter.ai/api/v1';                       // OpenRouter works from Hong Kong; any OpenAI-compatible endpoint works
-const MODELS = ['deepseek/deepseek-v4-flash-0731:free', 'inclusionai/ling-3.0-flash-fin:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'nex-agi/nex-n2.5-pro:free'];
+const MODELS = ['qwen/qwen3.8-27b:free', 'inclusionai/ling-3.0-flash-fin:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'nex-agi/nex-n2.5-pro:free'];
 // Premium option (needs credit on your OpenRouter account; unpaid models are skipped automatically):
 // const MODELS = ['qwen/qwen3.8-max-0902', 'moonshotai/kimi-k3', 'z-ai/glm-5.3'];   // (Hong Kong-billed accounts cannot use OpenAI/Anthropic/Google models on OpenRouter)    // tried in order; a busy or rate-limited model falls through to the next
 const SECONDS_BETWEEN_CALLS = 4;            // be polite to free tiers
