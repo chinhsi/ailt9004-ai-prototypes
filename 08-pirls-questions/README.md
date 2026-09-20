@@ -15,11 +15,12 @@ The second tab, **Check my own question**, is the reverse move: paste questions 
 
 ## Try it (3 minutes)
 
-1. Free OpenRouter key: <https://openrouter.ai/keys> → sign in → **Create key** (free models: 50 requests a day; one question set = one request).
-2. Open `pirls-questions.html` in Chrome or Edge, paste the key in **Settings**.
-3. Load a sample passage (EN informational / EN literary / 中文說明文 / 中文記敘文) or paste your own, 150–800 words or 300–1200 characters.
-4. Set grade, number of items, format mix → **Generate question set**. Read the coverage panel first, then the items.
-5. Try the other tab: paste two of your own questions and see what the tool says they measure.
+1. Free OpenRouter key: <https://openrouter.ai/keys> → sign in → **Create key** (free models: 50 requests a day; **one question set = one request**, and so is one click of *Check my own question*, however many questions you paste).
+2. Optional, if the free models keep answering *service temporarily overloaded*: add a few dollars of credit and pick one of the two paid presets. They deliberately contain no GPT, Claude or Gemini — those services are not open to Hong Kong accounts, and the point of these prototypes is what a teacher here can actually run. **Strongest Chinese:** `qwen/qwen3.8-max-0902` → `moonshotai/kimi-k3` → `z-ai/glm-5.3`, roughly **US$0.02 per question set**. **Low cost:** `deepseek/deepseek-v4-pro-0813` → `minimax/minimax-m3` → `z-ai/glm-5.3`, **under US$0.01**. Either way a few dollars lasts a term.
+3. Open `pirls-questions.html` in Chrome or Edge, paste the key in **Settings**.
+4. Load a sample passage (EN informational / EN literary / 中文說明文 / 中文記敘文) or paste your own, 150–800 words or 300–1200 characters.
+5. Pick the framework, then set grade, number of items and format mix → **Generate question set**. Read the coverage panel first, then the items.
+6. Try the other tab: paste two of your own questions and see what the tool says they measure.
 
 The key is stored only in your browser (localStorage). The file never contains a key.
 
@@ -65,6 +66,7 @@ MC items are worth 1 mark; CR items 1, 2 or 3 marks. PIRLS uses both formats; th
 - **Free models are weaker in Chinese.** Check 繁/簡 consistency and written-Chinese slips into Cantonese colloquial before printing. The *Premium* preset (needs credit) is more reliable for Chinese.
 - **Mark schemes drift.** A "2-mark" scoring guide sometimes describes three points. Fix it in the printed key; treat it as an item-moderation exercise.
 - Free models may train on what you send: use published passages, and keep pupils' names and answers out of it.
+- **When a model says "service temporarily overloaded"** it is the free tier queueing, not a fault in your passage. The page retries once, then tries the next model in the list; if all of them fail it says so and tells you to wait a minute or reorder the models. Model names change: if one disappears, replace it in Settings with any other model your endpoint offers.
 
 ## Build it yourself with the CLI
 

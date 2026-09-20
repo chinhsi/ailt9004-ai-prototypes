@@ -95,13 +95,15 @@
   <h2 data-i18n="setHead">Model and key</h2>
   <div class="row"><label data-i18n="preset">Model preset</label>
     <select id="preset">
-      <option value="https://openrouter.ai/api/v1|inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">OpenRouter (free models, works in Hong Kong)</option>
-      <option value="https://openrouter.ai/api/v1|qwen/qwen3-max, moonshotai/kimi-k2.6, deepseek/deepseek-v4">OpenRouter Premium (needs credit; better Chinese)</option>
-      <option value="custom">Custom (any OpenAI-compatible endpoint)</option>
+      <option value="https://openrouter.ai/api/v1|inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free">Free 免費 · OpenRouter :free models (50/day, no card)</option>
+      <option value="https://openrouter.ai/api/v1|qwen/qwen3.8-max-0902, moonshotai/kimi-k3, z-ai/glm-5.3">Paid 付費 · strongest Chinese 中文最穩 (Qwen → Kimi → GLM)</option>
+      <option value="https://openrouter.ai/api/v1|deepseek/deepseek-v4-pro-0813, minimax/minimax-m3, z-ai/glm-5.3">Paid 付費 · low cost 省錢 (DeepSeek → MiniMax → GLM)</option>
+      <option value="custom">Custom 自訂 (any OpenAI-compatible endpoint)</option>
     </select></div>
   <div class="row"><label data-i18n="apiKey">API key</label><input id="apiKey" type="password" placeholder="paste your key from openrouter.ai/keys"></div>
   <div class="row"><label data-i18n="baseUrl">Base URL</label><input id="baseUrl" value="https://openrouter.ai/api/v1"></div>
   <div class="row"><label data-i18n="models">Model(s)</label><input id="model" value="inclusionai/ling-3.0-flash-fin:free, nvidia/nemotron-3-super-120b-a12b:free, nex-agi/nex-n2.5-pro:free"></div>
+  <p class="hint" data-i18n="premiumHint"></p>
   <p class="hint" data-i18n="setHint">Your key stays in this browser (localStorage) and is sent only to the endpoint above. Free OpenRouter models allow 50 requests a day; one question set is one request. Free models may use your text for training, so use published passages and never paste real student names or personal data.</p>
 </section>
 
@@ -283,6 +285,8 @@ const T = {
   sub: ['four comprehension processes, one passage', '四層閱讀理解歷程，一篇課文'],
   settings: ['Settings', '設定'], setHead: ['Model and key', '模型與金鑰'], preset: ['Model preset', '模型組合'],
   apiKey: ['API key', 'API 金鑰'], baseUrl: ['Base URL', '端點網址'], models: ['Model(s)', '模型'],
+  premiumHint: ['The paid presets deliberately leave out GPT, Claude and Gemini: their own services are not open to Hong Kong accounts, and these prototypes are meant to show what a teacher here can actually run. Qwen (Alibaba), Kimi (Moonshot), GLM (Zhipu), DeepSeek and MiniMax all handle Chinese well and are billed by the token — roughly US$0.02 for one question set on the strongest preset, under US$0.01 on the low-cost one, so a few dollars of credit lasts a term. Free models cost nothing but queue behind everyone else, and that is what the "service temporarily overloaded" message means.',
+    '付費預設刻意不放 GPT、Claude、Gemini：這三家的自家服務不對香港帳號開放，而這些原型的用意就是示範「在這裡真的跑得動」的東西。Qwen（阿里）、Kimi（月之暗面）、GLM（智譜）、DeepSeek、MiniMax 的中文都穩，按用量計費——最強那組出一份題大約 US$0.02，省錢那組不到 US$0.01，儲值幾美元夠用一學期。免費模型不用錢，但要跟全世界排隊，那句「service temporarily overloaded」就是排隊的意思。'],
   setHint: ['Your key stays in this browser (localStorage) and is sent only to the endpoint above. Free OpenRouter models allow 50 requests a day; one question set is one request. Free models may use your text for training, so use published passages and never paste real student names or personal data.',
     '金鑰只存在這部瀏覽器（localStorage），只會送到上面的端點。OpenRouter 免費模型每天 50 次請求，出一份題等於一次。免費模型可能拿你的文字做訓練，請用公開課文，切勿貼入學生姓名或個人資料。'],
   step1: ['1. The passage', '一、課文'],
