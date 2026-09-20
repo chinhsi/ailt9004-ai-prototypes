@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Star Ferry - Online Quiz</title>
+  <style>
+    :root {
+      --primary-color: #0d5c3a;
+      --secondary-color: #1e824c;
+      --bg-color: #f4f7f6;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #dddddd;
+      --hover-bg: #e8f5e9;
+      --correct-bg: #d4edda;
+      --correct-text: #155724;
+      --incorrect-bg: #f8d7da;
+      --incorrect-text: #721c24;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .quiz-container {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      box-sizing: border-box;
+    }
+
+    .quiz-header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+
+    .quiz-header h1 {
+      margin: 0 0 10px 0;
+      color: var(--primary-color);
+      font-size: 24px;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background-color: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--secondary-color);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .question-counter {
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .options-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0 0 25px 0;
+    }
+
+    .option-item {
+      margin-bottom: 12px;
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      font-size: 16px;
+      background-color: #fff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-color);
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: var(--hover-bg);
+      border-color: var(--secondary-color);
+    }
+
+    .option-btn.selected {
+      border-color: var(--primary-color);
+      background-color: var(--hover-bg);
+    }
+
+    .option-btn.correct {
+      background-color: var(--correct-bg);
+      border-color: #28a745;
+      color: var(--correct-text);
+      font-weight: bold;
+    }
+
+    .option-btn.incorrect {
+      background-color: var(--incorrect-bg);
+      border-color: #dc3545;
+      color: var(--incorrect-text);
+    }
+
+    .nav-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .nav-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .result-screen {
+      text-align: center;
+      display: none;
+    }
+
+    .result-score {
+      font-size: 48px;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin: 20px 0;
+    }
+
+    .result-msg {
+      font-size: 18px;
+      margin-bottom: 25px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-container">
+    <div class="quiz-header">
+      <h1>The Star Ferry Quiz</h1>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="question-counter" id="questionCounter">Question 1 of 8</div>
+    </div>
+
+    <div id="quizScreen">
+      <div class="question-text" id="questionText">Question content goes here</div>
+      <ul class="options-list" id="optionsList"></ul>
+      <button class="nav-btn" id="nextBtn" disabled>Next Question</button>
+    </div>
+
+    <div class="result-screen" id="resultScreen">
+      <h2>Quiz Completed!</h2>
+      <div class="result-score" id="scoreDisplay">0 / 8</div>
+      <p class="result-msg" id="resultMsg">Good job!</p>
+      <button class="nav-btn" onclick="resetQuiz()">Try Again</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "1. When did the Star Ferry start carrying passengers between Hong Kong Island and Kowloon?",
+        options: ["A) 1898", "B) 1988", "C) 1908", "D) 1889"],
+        answer: 0
+      },
+      {
+        question: "2. What color are the Star Ferry boats?",
+        options: ["A) Blue and white", "B) Red and white", "C) Green and white", "D) Yellow and green"],
+        answer: 2
+      },
+      {
+        question: "3. According to the passage, a trip on the Star Ferry costs less than what?",
+        options: ["A) A cup of coffee", "B) A cup of milk tea", "C) A newspaper", "D) A bus ticket"],
+        answer: 1
+      },
+      {
+        question: "4. What happens at night on Victoria Harbour according to the text?",
+        options: ["A) The ferry stops running", "B) The lights reflect on the water", "C) Music plays on the open deck", "D) Fireworks are displayed"],
+        answer: 1
+      },
+      {
+        question: "5. What do office workers on the ferry do while tourists take photos?",
+        options: ["A) Guide the tourists around", "B) Read the news on their phones and pretend not to notice", "C) Sleep on the open deck", "D) Talk loudly with the crew"],
+        answer: 1
+      },
+      {
+        question: "6. What uniform do the ferry crew members wear?",
+        options: ["A) Green uniforms", "B) White chef uniforms", "C) Blue sailor uniforms", "D) Yellow safety vests"],
+        answer: 2
+      },
+      {
+        question: "7. What is a 'gangway'?",
+        options: ["A) A thick rope thrown to the pier", "B) A movable walkway or ramp used to get on or off a boat", "C) The ticket office at the pier", "D) The upper deck of the ferry"],
+        answer: 1
+      },
+      {
+        question: "8. What does the text describe a ferry ride as in a busy city?",
+        options: ["A) A dangerous journey", "B) A short pause", "C) A noisy experience", "D) A waste of time"],
+        answer: 1
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let selectedOption = null;
+
+    const questionText = document.getElementById("questionText");
+    const optionsList = document.getElementById("optionsList");
+    const nextBtn = document.getElementById("nextBtn");
+    const questionCounter = document.getElementById("questionCounter");
+    const progressFill = document.getElementById("progressFill");
+    const quizScreen = document.getElementById("quizScreen");
+    const resultScreen = document.getElementById("resultScreen");
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    const resultMsg = document.getElementById("resultMsg");
+
+    function loadQuestion() {
+      selectedOption = null;
+      nextBtn.disabled = true;
+      const q = questions[currentQuestion];
+
+      questionText.textContent = q.question;
+      questionCounter.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+      progressFill.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+      optionsList.innerHTML = "";
+      q.options.forEach((opt, idx) => {
+        const li = document.createElement("li");
+        li.className = "option-item";
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = opt;
+        btn.onclick = () => selectOption(idx, btn);
+        li.appendChild(btn);
+        optionsList.appendChild(li);
+      });
+
+      nextBtn.textContent = (currentQuestion === questions.length - 1) ? "Finish Quiz" : "Next Question";
+    }
+
+    function selectOption(index, btn) {
+      if (selectedOption !== null) return;
+      selectedOption = index;
+
+      const q = questions[currentQuestion];
+      const buttons = optionsList.querySelectorAll(".option-btn");
+
+      buttons.forEach((b) => b.disabled = true);
+
+      if (index === q.answer) {
+        btn.classList.add("correct");
+        score++;
+      } else {
+        btn.classList.add("incorrect");
+        buttons[q.answer].classList.add("correct");
+      }
+
+      nextBtn.disabled = false;
+    }
+
+    nextBtn.onclick = () => {
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    };
+
+    function showResults() {
+      quizScreen.style.display = "none";
+      resultScreen.style.display = "block";
+      scoreDisplay.textContent = `${score} / ${questions.length}`;
+
+      const percentage = (score / questions.length) * 100;
+      if (percentage === 100) {
+        resultMsg.textContent = "Excellent! Perfect score!";
+      } else if (percentage >= 75) {
+        resultMsg.textContent = "Great job! You know the passage very well!";
+      } else if (percentage >= 50) {
+        resultMsg.textContent = "Good effort! Try reading the text again to improve.";
+      } else {
+        resultMsg.textContent = "Keep practicing! Review the reading material and try again.";
+      }
+    }
+
+    function resetQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      quizScreen.style.display = "block";
+      resultScreen.style.display = "none";
+      loadQuestion();
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>

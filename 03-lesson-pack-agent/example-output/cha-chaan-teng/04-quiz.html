@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>茶餐廳的早晨 - 互動測驗</title>
+  <style>
+    :root {
+      --primary: #c25e00;
+      --primary-light: #fff8f0;
+      --text: #2d3748;
+      --gray: #718096;
+      --border: #e2e8f0;
+      --success: #2e7d32;
+      --success-bg: #e8f5e9;
+      --wrong: #c62828;
+      --wrong-bg: #ffebee;
+      --card-bg: #ffffff;
+      --bg: #f7fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang HK", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .quiz-container {
+      background: var(--card-bg);
+      max-width: 640px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    header {
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #edf2f7;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .question-meta {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .question-box {
+      margin-top: 24px;
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 14px 18px;
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+    }
+
+    .option-btn.correct {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .option-btn.wrong {
+      background-color: var(--wrong-bg);
+      border-color: var(--wrong);
+      color: var(--wrong);
+    }
+
+    .feedback {
+      margin-top: 18px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .feedback.correct {
+      background-color: var(--success-bg);
+      color: var(--success);
+      border: 1px solid var(--success);
+      display: block;
+    }
+
+    .feedback.wrong {
+      background-color: var(--wrong-bg);
+      color: var(--wrong);
+      border: 1px solid var(--wrong);
+      display: block;
+    }
+
+    .action-row {
+      margin-top: 24px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .next-btn, .retry-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .next-btn:hover, .retry-btn:hover {
+      opacity: 0.9;
+    }
+
+    .next-btn:disabled {
+      background: var(--gray);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .result-screen {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .score-circle {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 16px 0;
+    }
+
+    .result-msg {
+      font-size: 1.2rem;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <main class="quiz-container">
+    <header>
+      <h1>茶餐廳的早晨 — 閱讀測驗</h1>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+      <div class="question-meta">
+        <span id="q-counter">第 1 / 8 題</span>
+        <span id="score-counter">目前得分：0</span>
+      </div>
+    </header>
+
+    <div id="quiz-body">
+      <div class="question-box">
+        <div class="question-text" id="q-text">載入中...</div>
+        <div class="options-list" id="options"></div>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+
+      <div class="action-row">
+        <button class="next-btn" id="next-btn" disabled>下一題</button>
+      </div>
+    </div>
+
+    <div id="result-body" class="result-screen" style="display: none;">
+      <h2>測驗完成！</h2>
+      <div class="score-circle" id="final-score">0 / 8</div>
+      <p class="result-msg" id="final-msg"></p>
+      <button class="retry-btn" id="retry-btn">重新測驗</button>
+    </div>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "1. 課文中提到「新鮮出爐的菠蘿包」，「出爐」的意思是甚麼？",
+        options: [
+          "剛從焗爐中烘烤好取出",
+          "剛從雪櫃中拿出來",
+          "剛剛擺放在餐桌上",
+          "剛從工廠運送抵達"
+        ],
+        answer: 0,
+        explanation: "「出爐」指食物烘烤完成從烤爐中取出。"
+      },
+      {
+        question: "2. 早上七點，熟客陳先生走進茶餐廳後坐在哪裏？",
+        options: [
+          "靠門口的吧台位子",
+          "靠窗的位子",
+          "靠近廚房的角落",
+          "收銀櫃台旁的圓桌"
+        ],
+        answer: 1,
+        explanation: "文中指出陳先生「坐在靠窗的位子，打開報紙」。"
+      },
+      {
+        question: "3. 伙計阿強問陳先生：「陳生，照舊？」，「照舊」在此處的意思是：",
+        options: [
+          "按照往常的習慣點同樣的餐點",
+          "詢問陳先生是否有舊報紙",
+          "問候陳先生身體是否健康如常",
+          "核對過去未付清的舊單據"
+        ],
+        answer: 0,
+        explanation: "「照舊」指按照原樣或往常的習慣點餐。"
+      },
+      {
+        question: "4. 陳先生每天吃的早餐包含了哪兩樣食物和飲品？",
+        options: [
+          "熱咖啡配火腿通粉",
+          "熱奶茶配沙嗲牛肉麵",
+          "凍檸茶配餐蛋麵",
+          "熱開水配新鮮菠蘿包"
+        ],
+        answer: 1,
+        explanation: "文中明確描寫送上的是「一杯熱奶茶和一份沙嗲牛肉麵」。"
+      },
+      {
+        question: "5. 陳先生每天都吃這份相同的早餐，持續了多久？",
+        options: [
+          "五年",
+          "十年",
+          "二十年",
+          "三十年"
+        ],
+        answer: 2,
+        explanation: "課文提到陳先生「二十年來從沒改變」。"
+      },
+      {
+        question: "6. 「七點半，學生和上班族開始湧進來」，「湧」字最生動地表現出甚麼情況？",
+        options: [
+          "顧客整齊排成一線慢慢前進",
+          "人群像潮水般大量且急速地進入",
+          "大家三三兩兩慢步閒逛進來",
+          "顧客悄無聲息地各自走入"
+        ],
+        answer: 1,
+        explanation: "「湧」形容人潮如水流般大量且快速湧入。"
+      },
+      {
+        question: "7. 在七點半最繁忙嘈雜的時刻，茶餐廳伙計們的表現是怎樣的？",
+        options: [
+          "手忙腳亂，時常送錯餐點",
+          "走得飛快，卻從來不會弄錯一張單",
+          "暫時停止接單，等嘈雜聲平息",
+          "顯得不耐煩並與顧客發生爭執"
+        ],
+        answer: 1,
+        explanation: "文中描寫「伙計們走得飛快，卻從來不會弄錯一張單」。"
+      },
+      {
+        question: "8. 阿強認為茶餐廳「最好的時間」是甚麼時候？",
+        options: [
+          "早上七點開門亮燈時",
+          "七點半生意最繁忙熱鬧的時候",
+          "忙完之後那十分鐘的安靜",
+          "八點半準備打烊下班之際"
+        ],
+        answer: 2,
+        explanation: "阿強說最好的時間是「忙完之後那十分鐘的安靜」。"
+      }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+    let answered = false;
+
+    const qText = document.getElementById('q-text');
+    const optionsContainer = document.getElementById('options');
+    const feedback = document.getElementById('feedback');
+    const nextBtn = document.getElementById('next-btn');
+    const progress = document.getElementById('progress');
+    const qCounter = document.getElementById('q-counter');
+    const scoreCounter = document.getElementById('score-counter');
+    const quizBody = document.getElementById('quiz-body');
+    const resultBody = document.getElementById('result-body');
+    const finalScore = document.getElementById('final-score');
+    const finalMsg = document.getElementById('final-msg');
+    const retryBtn = document.getElementById('retry-btn');
+
+    function renderQuestion() {
+      answered = false;
+      feedback.className = 'feedback';
+      feedback.style.display = 'none';
+      nextBtn.disabled = true;
+
+      const q = questions[currentQ];
+      qText.textContent = q.question;
+      qCounter.textContent = `第 ${currentQ + 1} / ${questions.length} 題`;
+      progress.style.width = `${((currentQ) / questions.length) * 100}%`;
+
+      optionsContainer.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = `${String.fromCharCode(65 + idx)}. ${opt}`;
+        btn.onclick = () => selectOption(idx);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectOption(index) {
+      if (answered) return;
+      answered = true;
+
+      const q = questions[currentQ];
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (index === q.answer) {
+        score++;
+        buttons[index].classList.add('correct');
+        feedback.className = 'feedback correct';
+        feedback.textContent = `✓ 正確！${q.explanation}`;
+      } else {
+        buttons[index].classList.add('wrong');
+        buttons[q.answer].classList.add('correct');
+        feedback.className = 'feedback wrong';
+        feedback.textContent = `✗ 答錯了。正確答案是 ${String.fromCharCode(65 + q.answer)}。${q.explanation}`;
+      }
+
+      feedback.style.display = 'block';
+      scoreCounter.textContent = `目前得分：${score}`;
+      nextBtn.disabled = false;
+
+      if (currentQ === questions.length - 1) {
+        nextBtn.textContent = '查看結果';
+      } else {
+        nextBtn.textContent = '下一題';
+      }
+    }
+
+    nextBtn.onclick = () => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    };
+
+    function showResult() {
+      progress.style.width = '100%';
+      quizBody.style.display = 'none';
+      resultBody.style.display = 'block';
+      finalScore.textContent = `${score} / ${questions.length}`;
+
+      const pct = Math.round((score / questions.length) * 100);
+      if (pct === 100) {
+        finalMsg.textContent = "太出色了！全部答對，你對課文內容與詞彙掌握得非常精準！";
+      } else if (pct >= 75) {
+        finalMsg.textContent = "表現很好！你對這篇課文有很清晰的理解！";
+      } else {
+        finalMsg.textContent = "再接再厲！建議重新溫習課文詞彙後再次挑戰。";
+      }
+    }
+
+    retryBtn.onclick = () => {
+      currentQ = 0;
+      score = 0;
+      scoreCounter.textContent = '目前得分：0';
+      quizBody.style.display = 'block';
+      resultBody.style.display = 'none';
+      nextBtn.textContent = '下一題';
+      renderQuestion();
+    };
+
+    renderQuestion();
+  </script>
+</body>
+</html>
