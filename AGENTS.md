@@ -9,12 +9,24 @@ Teaching prototypes for the HKU course AILT9004. Each numbered folder is one sel
 - `01-speaking-pal/` — `speaking-pal.html`, a single-file voice conversation partner. Runs entirely in the browser. **Nothing needs to be installed** for it.
 - `04-irony-mirror/` — `irony-mirror.html`, a single-file "two faces of a word" tool for teaching irony: text from an OpenAI-compatible API, pictures from Pollinations.ai (a free image service addressed by URL, no key). **Nothing needs to be installed** for it either.
 - `05-picture-talk/` — `picture-talk.html`, a single-file 看圖說話 game: the AI writes a hidden sentence, Pollinations draws it, the student describes it, the AI marks it. Same setup as prototype 4 (OpenRouter key; optional Pollinations key); voice input is optional and needs Chrome/Edge. Nothing to install.
+- `06-hanzi-game/` — documentation only (brief, build story, README); the game itself is built elsewhere and hosted at <https://chinhsi.github.io/hanzi-game-pages/>. Nothing to install.
+- `07-hanzi-quest/` — a static Chinese word-battle game with packaged audio. No key, no live AI calls. Nothing to install.
+- `08-pirls-questions/` — `pirls-questions.html`, a single-file reading-question generator for teachers with two switchable frameworks (PIRLS 2021 four processes; 祝新華 six levels) and a bilingual interface. Needs an OpenRouter key only. Nothing to install.
 
 ## Environment facts you must respect
 
 - The user is probably in **Hong Kong**. The following do **not** work from Hong Kong accounts/networks and must not be recommended: Google Gemini API and AI Studio, Google Antigravity CLI, OpenAI / ChatGPT / Codex, Anthropic Claude, Groq, Cerebras. Do not suggest a VPN.
 - Services that **do** work from Hong Kong and are free: **OpenRouter** (`https://openrouter.ai`, free models end in `:free`, 50 requests/day without credit, no credit card) and **OpenCode** with its free Zen models (`https://opencode.ai`).
 - Free open models are used on purpose. Do not "upgrade" the code to a paid or region-locked provider.
+
+## Model policy (read before touching any model list)
+
+- **Never put OpenAI, Anthropic or Google models in these files.** An OpenRouter account billed to Hong Kong is refused them with a 403 ("billing address is in a region that does not have access to models from OpenAI, Anthropic, and Google"), paid or not.
+- Current free chain (the default in every page): `deepseek/deepseek-v4-flash-0731:free`, then `inclusionai/ling-3.0-flash-fin:free`, `nvidia/nemotron-3-super-120b-a12b:free`, `nex-agi/nex-n2.5-pro:free`.
+- Paid presets, for a teacher who adds credit: **strongest Chinese** `qwen/qwen3.8-max-0902` → `moonshotai/kimi-k3` → `z-ai/glm-5.3`; **low cost** `deepseek/deepseek-v4-pro-0813` → `minimax/minimax-m3` → `z-ai/glm-5.3`.
+- **Model ids get retired** (`deepseek/deepseek-v4` was, in September 2026). Before you change or recommend a model list, verify every id against <https://openrouter.ai/api/v1/models>; on this user's machine `~/bin/check-model-ids.sh <folder>` does it in one command and exits non-zero if an id is gone.
+- Treat `429` and any "overloaded / capacity / upstream" message as *the free tier queueing*: retry once, fall through to the next model in the list, and only then tell the user — with advice (wait a minute, or reorder the models), not a raw error string.
+- `openai/gpt-image-2.5-flare` in prototypes 4 and 5 is a **Pollinations** image model, not an OpenRouter model. Do not "fix" it.
 
 ## Prototype 1 — Speaking Pal: what to install
 

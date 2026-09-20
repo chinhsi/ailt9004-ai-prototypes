@@ -15,7 +15,7 @@ The second tab, **Check my own question**, is the reverse move: paste questions 
 
 ## Try it (3 minutes)
 
-1. Free OpenRouter key: <https://openrouter.ai/keys> → sign in → **Create key** (free models: 50 requests a day; **one question set = one request**, and so is one click of *Check my own question*, however many questions you paste).
+1. Free OpenRouter key: <https://openrouter.ai/keys> → sign in → **Create key** (free models: 50 requests a day; **one question set = one request**, and so is one click of *Check my own question*, however many questions you paste)). The free preset now starts with `deepseek/deepseek-v4-flash-0731:free` — free, good in Chinese, and a 1M context so a long passage plus a full question set fits.
 2. Optional, if the free models keep answering *service temporarily overloaded*: add a few dollars of credit and pick one of the two paid presets. They deliberately contain no GPT, Claude or Gemini — those services are not open to Hong Kong accounts, and the point of these prototypes is what a teacher here can actually run. **Strongest Chinese:** `qwen/qwen3.8-max-0902` → `moonshotai/kimi-k3` → `z-ai/glm-5.3`, roughly **US$0.02 per question set**. **Low cost:** `deepseek/deepseek-v4-pro-0813` → `minimax/minimax-m3` → `z-ai/glm-5.3`, **under US$0.01**. Either way a few dollars lasts a term.
 3. Open `pirls-questions.html` in Chrome or Edge, paste the key in **Settings**.
 4. Load a sample passage (EN informational / EN literary / 中文說明文 / 中文記敘文) or paste your own, 150–800 words or 300–1200 characters.
