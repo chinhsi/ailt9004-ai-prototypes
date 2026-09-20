@@ -22,7 +22,7 @@ Teaching prototypes for the HKU course AILT9004. Each numbered folder is one sel
 ## Model policy (read before touching any model list)
 
 - **Never put OpenAI, Anthropic or Google models in these files.** An OpenRouter account billed to Hong Kong is refused them with a 403 ("billing address is in a region that does not have access to models from OpenAI, Anthropic, and Google"), paid or not.
-- Current free chain (the default in every page): `deepseek/deepseek-v4-flash-0731:free`, then `inclusionai/ling-3.0-flash-fin:free`, `nvidia/nemotron-3-super-120b-a12b:free`, `nex-agi/nex-n2.5-pro:free`.
+- Current free chain (the default in every page): `qwen/qwen3.8-27b:free`, then `inclusionai/ling-3.0-flash-fin:free`, `nvidia/nemotron-3-super-120b-a12b:free`, `nex-agi/nex-n2.5-pro:free`. (A free DeepSeek model led this list for a few hours on 20 Sep 2026 and was delisted the same afternoon — that is how fast this changes.)
 - Paid presets, for a teacher who adds credit: **strongest Chinese** `qwen/qwen3.8-max-0902` → `moonshotai/kimi-k3` → `z-ai/glm-5.3`; **low cost** `deepseek/deepseek-v4-pro-0813` → `minimax/minimax-m3` → `z-ai/glm-5.3`.
 - **Model ids get retired** (`deepseek/deepseek-v4` was, in September 2026). Before you change or recommend a model list, verify every id against <https://openrouter.ai/api/v1/models>; on this user's machine `~/bin/check-model-ids.sh <folder>` does it in one command and exits non-zero if an id is gone.
 - Treat `429` and any "overloaded / capacity / upstream" message as *the free tier queueing*: retry once, fall through to the next model in the list, and only then tell the user — with advice (wait a minute, or reorder the models), not a raw error string.
