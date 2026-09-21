@@ -1,8 +1,8 @@
 # Prototype 3 — Lesson Pack Agent (a CLI agent with two text files)
 
-**What it does:** you give the AI agent any short text and one command; it runs a fixed 9-step workflow and writes a complete lesson pack into a folder: vocabulary, comprehension questions, cloze exercise, a self-checking HTML quiz, and teacher notes. Then it checks its own quiz against the text.
+**What it does:** you give the AI agent a short text (roughly 120–800 words, or 200–1200 Chinese characters — the recipe says what to do outside that range) and one command; it runs a fixed 9-step workflow and writes a complete lesson pack into a folder: vocabulary, comprehension questions, cloze exercise, a self-checking HTML quiz, and teacher notes. Then it checks its own quiz against the text.
 
-**Tool used:** an AI CLI agent plus plain-text files, no code at all: the standing rules (`AGENTS.md`, with a byte-identical copy in `GEMINI.md` for the other CLI), the recipe that becomes the `/lesson-pack` command (`.opencode/commands/lesson-pack.md`, and the same recipe as `.agents/skills/lesson-pack/SKILL.md` for agy), and one line of model setting in `opencode.json`. Five files, all readable. The folder works with **two CLIs** — the same rules, two file locations:
+**Tool used:** an AI CLI agent plus plain-text files, no code at all: the standing rules (`AGENTS.md`, with a byte-identical copy in `GEMINI.md` for the other CLI), the recipe that becomes the `/lesson-pack` command (`.opencode/commands/lesson-pack.md`, with the identical recipe in `.agents/skills/lesson-pack/SKILL.md` for agy — only the first line differs, because the two CLIs receive the arguments differently), and one line of model setting in `opencode.json`. Five files, all readable. The folder works with **two CLIs** — the same rules, two file locations:
 
 | CLI | Rules file | Command file | Default model |
 |---|---|---|---|
@@ -13,7 +13,7 @@
 
 ## Try it (5 minutes)
 
-1. Install OpenCode and connect the free OpenCode Zen models — *Getting Started with AI Command-Line Tools* on Moodle, or <https://opencode.ai> (install, then `opencode auth login` and choose Zen).
+1. Install OpenCode and connect its free Zen models. Course students: *Getting Started with AI Command-Line Tools* on Moodle. Everyone else: install from <https://opencode.ai> (Mac/Linux `curl -fsSL https://opencode.ai/install | bash`; Windows: see their site), then run `opencode auth login` and choose **Zen** — free, no credit card, and reachable from Hong Kong without a VPN.
 2. Download this folder and open a terminal inside it:
    - Mac: right-click the folder → **New Terminal at Folder** (or `cd` into it)
    - Windows: type `cmd` in the folder's address bar
@@ -31,7 +31,7 @@ Antigravity CLI users: run `agy` in the folder and type the same `/lesson-pack �
 
 ## Make it yours
 
-- Put your own text in `samples/` as a plain `.txt` file — **something you may send to an external AI service**: your own writing, public-domain or openly licensed material, or a passage your school has cleared. A textbook or exam passage usually is not. Never use a pupil's own writing here: it carries personal data, and the rules file tells the agent to stop if it sees it.
+- Put your own text in `samples/` as a plain `.txt` file — **something you may send to an external AI service**: your own writing, public-domain or openly licensed material, or a passage your school has cleared. A textbook or exam passage usually is not. Be careful with pupils' own writing: it carries personal data. Remove names, school, class number and any identifying detail first, make sure you are allowed to use it, and the agent will work with the anonymised text — the rules file tells it to check with you if a text looks like identifiable pupil work.
 - **Edit the recipe — this is the exercise.** Open `.opencode/commands/lesson-pack.md`: steps 1–9 *are* the lesson design. Safe first edits: step 4, change `4 literal questions, 3 inferential questions` to your own mix; step 6, change `8 questions` to 5; step 3, add "and a Cantonese gloss for each word"; step 7, change the 40-minute flow to your period length. Run it again on the same text and put the two packs side by side — that difference is the whole point.
 - If you also use agy, copy your change into `.agents/skills/lesson-pack/SKILL.md`: the two files hold the same recipe for two CLIs, and nothing keeps them in sync but you.
 - Edit `AGENTS.md` to change the house style or the level system (copy the change into `GEMINI.md` too).
@@ -46,7 +46,7 @@ Antigravity CLI users: run `agy` in the folder and type the same `/lesson-pack �
 | "file not found" | Wrong path, or spaces in the file name | Put the path in quotes: `/lesson-pack "samples/my reading text.txt" KS3` |
 | Rate-limit / quota message, or the agent stops after two or three files | The free model's daily allowance is gone, or the model is busy | Wait, or type `/models` inside OpenCode and pick another free model, then edit `opencode.json`. Re-run the command: it overwrites the half-finished pack |
 | The model in `opencode.json` is rejected | Free model names change without notice | `/models` → choose one that is there today → edit the `model` line in `opencode.json` |
-| Five files, but one is empty or missing | The agent stopped early | Run the command again; if it keeps failing on the same file, shorten the source text |
+| A file is empty or missing | The agent stopped early — usually the free quota, a busy model, or a long source text that made the HTML run out of room | Read what the agent said before it stopped; it is told to name the file it could not finish. Run the command again (it overwrites). If the same file keeps failing, switch model with `/models`, or try a shorter text |
 
 ## Check before use
 

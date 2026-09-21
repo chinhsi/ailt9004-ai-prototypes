@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PIRLS Question Generator 閱讀理解出題器</title>
+<title>Reading Question Generator 閱讀理解出題器</title>
 <style>
   :root { --ink:#1f2a24; --cream:#faf6ee; --green:#3E724F; --blue:#33658A; --gold:#b8860b; --coral:#b3402f; --muted:#6b7570; --card:#ffffff; --line:#e2dccd; --sand:#f4f1e8; --plum:#6b4e9b; --teal:#217a76; }
   * { box-sizing: border-box; }
@@ -233,7 +233,7 @@
 </section>
 
 </main>
-<footer>PIRLS Question Generator · AILT9004 / MEDD8934 prototype 8 · one HTML file + any OpenAI-compatible API · PIRLS framework: Mullis &amp; Martin (2019), <i>PIRLS 2021 Assessment Frameworks</i></footer>
+<footer>閱讀理解出題器 Reading Question Generator · AILT9004 / MEDD8934 prototype 8 · one HTML file + any OpenAI-compatible API<br>Frameworks: Mullis &amp; Martin (2019), <i>PIRLS 2021 Assessment Frameworks</i> · 祝新華（2008）。六層次閱讀能力系統及其在評估與教學領域中的運用。《小學語文》，(4)，4–7。</footer>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -281,8 +281,8 @@ let PROC = PROC_PIRLS;
 
 // ---------- UI text (English / 繁體中文) ----------
 const T = {
-  title: ['PIRLS Question Generator', 'PIRLS 閱讀理解出題器'],
-  sub: ['four comprehension processes, one passage', '四層閱讀理解歷程，一篇課文'],
+  title: ['Reading Question Generator', '閱讀理解出題器'],
+  sub: ['PIRLS 2021 or 祝新華 六層次 — one passage, a whole question set', 'PIRLS 2021 或祝新華六層次——一篇課文，一整份題目'],
   settings: ['Settings', '設定'], setHead: ['Model and key', '模型與金鑰'], preset: ['Model preset', '模型組合'],
   apiKey: ['API key', 'API 金鑰'], baseUrl: ['Base URL', '端點網址'], models: ['Model(s)', '模型'],
   premiumHint: ['The paid presets deliberately leave out GPT, Claude and Gemini: their own services are not open to Hong Kong accounts, and these prototypes are meant to show what a teacher here can actually run. Qwen (Alibaba), Kimi (Moonshot), GLM (Zhipu), DeepSeek and MiniMax all handle Chinese well and are billed by the token — roughly US$0.02 for one question set on the strongest preset, under US$0.01 on the low-cost one, so a few dollars of credit lasts a term. Free models cost nothing but queue behind everyone else, and that is what the "service temporarily overloaded" message means.',
@@ -310,6 +310,8 @@ const T = {
   fwHint: ['Weights are the PIRLS 2021 assessment design. Multiple-choice items are worth 1 mark; constructed-response items 1, 2 or 3 marks.',
     '比重為 PIRLS 2021 的評估設計。選擇題 1 分；開放題 1、2 或 3 分。'],
   promptHead: ['The prompt is the lesson design', '提示語就是教學設計'],
+  promptIntroZh: ['Everything the tool knows about item quality is in this text. Edit it, generate again, and compare: that is how you tune a generator to your own school\u2019s marking culture. The 祝新華 prompts are written in Chinese, because that is the language this framework\u2019s terms live in; the PIRLS ones are in English. Either way the questions follow the language you chose above.',
+    '這個工具對「好題目」的全部認識都寫在下面這段文字裡。改它、再出一次題、兩份對照——這就是把出題器調成自己學校評卷文化的方法。祝新華這兩段提示語用中文寫（這套術語本來就活在中文裡），PIRLS 那兩段用英文；無論哪一套，出來的題目都依你上面選的語言。'],
   promptIntro: ['Everything the tool knows about item quality is in this text. Edit it, generate again, and compare: that is how you tune a generator to your own school’s marking culture. Prompts are in English because the free models follow English instructions more reliably; the questions they write follow the language you choose above.',
     '這個工具對「好題目」的全部認識都寫在下面這段文字裡。改它、再出一次題、兩份對照——這就是把出題器調成自己學校評卷文化的方法。提示語用英文，因為免費模型對英文指令較穩；出來的題目仍依你上面選的語言。'],
   promptGen: ['Generator prompt', '出題提示語'], promptCheck: ['Question-checker prompt', '檢核提示語'],
@@ -327,9 +329,11 @@ const T = {
   answer: ['Answer', '答案'], scoring: ['Scoring guide', '評分指引'], why: ['Why this process', '為何屬於這個層次'],
   mark: ['mark', '分'], marks: ['marks', '分'], mc: ['Multiple choice', '選擇題'], cr: ['Constructed response', '開放題'],
   target: ['target', '目標'], copied: ['Copied to the clipboard.', '已複製到剪貼簿。'], copyFail: ['Could not copy — select the text and copy manually.', '無法自動複製，請自行選取文字複製。'],
+  noContrast: ['the model did not say \u2014 judge this boundary yourself before trusting the label.', '模型沒有說明——這個層次標籤請自己判斷後再採信。'],
   warnOpts: ['not 4 options', '選項不是 4 個'], warnCrOpts: ['open item with options', '開放題卻附選項'],
   warnAns: ['answer matches no option', '答案對不上選項'], warnScoring: ['no scoring guide', '缺評分指引'],
   warnPoints: ['stem does not say how many points', '題幹沒說要答幾點'],
+  noVerdict: ['the model returned no verdict for this one — send it again on its own', '模型沒有回覆這一題——請單獨再送一次'],
   countMismatch: ['The model returned {a} verdicts for {b} questions — check the pairing before you trust them.', '模型對 {b} 題只回了 {a} 條判斷——請先核對配對再採信。'],
   measures: ['Actually measures', '實際測的是'], textDep: ['Needs the passage', '須讀課文才能答'], answerable: ['Answerable from the passage', '課文足以作答'],
   issues: ['Problems', '問題'], rewriteL: ['Fixed version', '修訂版'], levelUp: ['One process higher', '提升一個層次'], suggested: ['Full-credit answer', '滿分答案要點'],
@@ -408,7 +412,7 @@ const ZHU_GEN = `你是香港中文科的資深閱讀評估命題員，按祝新
 第 1、2 層為低層次；第 3 至 6 層為高層次。
 
 規則
-- 每題都要學生只憑這篇課文（加上該年級應有的常識）就能作答。第 6 層可以向外延伸，但仍要扣住篇章的內容或處境。
+- 每題都要學生只憑這篇課文就能作答。所謂「常識」只限讀懂這篇課文所需的一般語文與生活認識，不可以出成靠課外知識才答得到的題目。第 6 層可以向外延伸，但起點仍是篇章：學生要說得出是根據課文的哪裡。
 - 第 1 層的答案必須在文中一處找得到。選擇題四個選項全部取材自篇章，但只有一個真正回答題幹；不用「以上皆是」「以上皆非」，不用是非題式問法。
 - 第 3 層不能靠單一句子答出來；若可以，它其實是第 1 或第 2 層，請老實標示。
 - 第 4 層必須有文本依據，不是憑空想像。第 5 層必須指向具體的字詞、句子、手法或人物做法。第 6 層要講清楚「根據篇章的甚麼」。
@@ -453,6 +457,7 @@ const ZHU_CHECK = `你是熟悉祝新華「六層次閱讀能力系統」（祝�
 const FW = {
   pirls: {
     procs: PROC_PIRLS, gen: DEFAULT_GEN, check: DEFAULT_CHECK,
+    defaultLang: 'the same language and script as the passage',
     tableWeights: [20, 30, 30, 20],
     tableTitle: ['The four PIRLS comprehension processes', 'PIRLS 四個閱讀理解層次'],
     tableHint: ['Weights are the PIRLS 2021 assessment design. Multiple-choice items are worth 1 mark; constructed-response items 1, 2 or 3 marks.',
@@ -469,6 +474,7 @@ const FW = {
   },
   zhu: {
     procs: PROC_ZHU, gen: ZHU_GEN, check: ZHU_CHECK,
+    defaultLang: 'Traditional Chinese (繁體中文) in standard written Chinese as used in Hong Kong textbooks, never Cantonese colloquial forms (嘅 係 喺 咗 啲 佢 乜 邊度)',
     tableWeights: [10, 10, 20, 20, 20, 20],
     tableTitle: ['祝新華: the six levels of reading ability', '祝新華 六層次閱讀能力'],
     tableHint: ['The weights shown follow the 50-mark test design used with this system (5 marks each for 複述 and 解釋, 10 marks each for the other four). Levels 1–2 are the lower levels, 3–6 the higher ones. Source: 祝新華 (2008), 六層次閱讀能力系統及其在評估與教學領域中的運用, 小學語文, (4), 4–7.',
@@ -558,6 +564,7 @@ function applyLang() {
   $('fwNote').textContent = FW[FWK].note[L];
   $('covHintEl').textContent = FW[FWK].covHint[L];
   $('covTitleEl').textContent = FW[FWK].covTitle[L];
+  document.querySelector('[data-i18n="promptIntro"]').textContent = (FWK === 'zhu' ? T.promptIntroZh : T.promptIntro)[L];
   $('fwTable').innerHTML = '<tr><th>' + esc(T.procCol[L]) + '</th><th>' + esc(T.weightCol[L]) + '</th><th>' + esc(T.exCol[L]) + '</th></tr>' +
     FW[FWK].tableWeights.map((w, i) => {
       const p = PROC[i + 1];
@@ -571,11 +578,11 @@ function applyLang() {
 $('langBtn').addEventListener('click', () => { L = 1 - L; store('ui', L ? 'zh' : 'en'); applyLang(); });
 
 // ---------- settings, tabs, passage ----------
-['apiKey', 'baseUrl', 'model', 'itemLang', 'grade', 'nItems', 'mix', 'passage', 'myQuestions'].forEach(id => {
+['apiKey', 'baseUrl', 'model', 'grade', 'nItems', 'mix', 'passage', 'myQuestions'].forEach(id => {
   const v = load(id, null); if (v !== null) $(id).value = v;
   $(id).addEventListener('change', () => store(id, $(id).value));
 });
-['genPrompt', 'checkPrompt', 'weights', 'purpose'].forEach(k => {          // anything saved before the framework picker existed belongs to PIRLS
+['genPrompt', 'checkPrompt', 'weights', 'purpose', 'itemLang'].forEach(k => {          // anything saved before the framework picker existed belongs to PIRLS
   const old = load(k, null); if (old !== null && load(k + '_pirls', null) === null) store(k + '_pirls', old);
   $(k).addEventListener('change', () => store(k + '_' + FWK, $(k).value));
 });
@@ -589,8 +596,12 @@ function applyFramework() {
   $('purpose').innerHTML = f.purposes.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join('');
   $('purpose').value = load('purpose_' + FWK, '') || f.purposes[0][0];
   if (!$('purpose').value) $('purpose').value = f.purposes[0][0];
+  const savedLang = load('itemLang_' + FWK, '');
+  $('itemLang').value = savedLang || f.defaultLang;       // a Chinese-subject framework should not default to English items
+  if (!$('itemLang').value) $('itemLang').selectedIndex = 0;
   $('genPrompt').value = load('genPrompt_' + FWK, f.gen);
   $('checkPrompt').value = load('checkPrompt_' + FWK, f.check);
+  reqSeq++;                                                                 // a reply still in flight belongs to the old framework: drop it when it arrives
   lastSet = null; lastCheck = null; lastTargets = null;                     // old items carry the other framework's level labels: clear them
   $('items').innerHTML = ''; $('checkOut').innerHTML = '';
   $('covPanel').classList.add('hidden'); $('actionsPanel').classList.add('hidden');
@@ -681,7 +692,8 @@ function parseJSON(text) {
 }
 
 // ---------- generate ----------
-let lastSet = null, lastCheck = null, lastTargets = null, lastTotal = 0, reqSeq = 0;
+let reqSeq = 0;
+let lastSet = null, lastCheck = null, lastTargets = null, lastTotal = 0;
 function targetCounts(n, w) {
   const raw = w.map(x => n * x / 100), base = raw.map(Math.floor);
   let left = n - base.reduce((a, b) => a + b, 0);
@@ -735,10 +747,10 @@ function normItem(raw, i) {
   const options = Array.isArray(raw.options) ? raw.options.map(str).map(s => s.replace(/^\s*[A-Da-d][).、.]\s*/, '').trim()).filter(Boolean) : [];
   const fmt = str(raw.format).toLowerCase();
   const saysMC = /mc|multiple|choice|選擇|选择/.test(fmt), saysCR = /cr|constructed|open|short|extended|問答|问答|開放|开放/.test(fmt);
-  const isMC = saysMC ? options.length >= 2 : (saysCR ? false : options.length >= 2);   // the model's own label decides; options only settle it when there is no label
+  const isMC = saysMC ? true : (saysCR ? false : options.length >= 2);   // the model's own label decides; options only settle it when there is no label
   const warn = [];
-  if (saysMC && options.length !== 4) warn.push('Opts');
-  if (saysCR && options.length >= 2) warn.push('CrOpts');
+  if (isMC && options.length !== 4) warn.push('Opts');
+  if (saysCR && options.length) warn.push('CrOpts');
   let marks = parseInt(raw.marks, 10); if (!(marks >= 1 && marks <= 3)) marks = 1;
   if (isMC) marks = 1;
   const scoring = str(raw.scoring).trim();
@@ -746,13 +758,13 @@ function normItem(raw, i) {
   if (isMC) {
     let idx = -1;
     const m = ans.match(/^\s*([A-Da-d])\b/); if (m) idx = 'abcd'.indexOf(m[1].toLowerCase());
-    if (idx < 0) { const d = ans.match(/^\s*\(?([1-9])\)?\s*[).、.]?\s*$/); if (d) idx = +d[1] - 1; }        // some models answer with the option number
+    if (idx < 0) { const d = ans.match(/^\s*\(?([0-9])\)?\s*[).、.]?\s*$/); if (d) idx = (+d[1] === 0) ? 0 : +d[1] - 1; }   // some models answer with the option number, 1-based or 0-based
     if (idx < 0) idx = options.findIndex(o => o && ans && o.toLowerCase() === ans.toLowerCase());
     if (idx < 0) idx = options.findIndex(o => o && ans && (o.toLowerCase().startsWith(ans.toLowerCase()) || ans.toLowerCase().startsWith(o.toLowerCase())));
     if (idx >= 0 && idx < options.length) ans = 'ABCD'[idx] + '. ' + options[idx]; else warn.push('Ans');
   } else {
     if (marks > 1 && !scoring) warn.push('Scoring');
-    if (marks > 1 && !/\b(two|three|2|3)\b|兩|两|三|二/.test(q)) warn.push('Points');   // a 2- or 3-mark item must tell pupils how many points to give
+    if (marks > 1 && !/(two|three|both)\s+(reasons|details|points|examples|ways|things|ideas)|\b[23]\s*(reasons|details|points|examples)|[兩两二三]\s*[個个項项點点樣样方]|列出[兩两二三]|舉出[兩两二三]/i.test(q)) warn.push('Points');   // the stem must say how many points, and 'paragraph 2' must not count
   }
   let np = parseInt(raw.not_process, 10);
   if (!(np >= 1 && np <= PROC.length - 1) || np === p) np = (p === 1) ? 2 : p - 1;        // default contrast: the process below, or 2 for a process 1 item
@@ -791,10 +803,10 @@ function renderItems(set) {
       (it.warn || []).map(w => T['warn' + w] ? '<span class="badge warn">' + esc(T['warn' + w][L]) + '</span>' : '').join('') + '</div>' +
       '<p class="qtext"><span class="qno">' + (i + 1) + '.</span>' + esc(it.question) + '</p>' + opts +
       (key ? '<div class="keyblock keyonly">' + key + '</div>' : '') +
-      (it.why || it.notWhy ? '<div class="why keyonly">' +
+      '<div class="why keyonly">' +
         (it.why ? '<div><b>' + esc(T.why[L]) + ':</b> ' + esc(it.why) + '</div>' : '') +
-        (it.notWhy ? '<div style="margin-top:4px"><b>' + esc(contrastLabel(it.notProcess)) + ':</b> ' + esc(it.notWhy) + '</div>' : '') +
-        '</div>' : '') +
+        '<div style="margin-top:4px"><b>' + esc(contrastLabel(it.notProcess)) + ':</b> ' + esc(it.notWhy || T.noContrast[L]) + '</div>' +
+      '</div>' +
       '</div>';
   }).join('');
 }
@@ -819,6 +831,7 @@ $('checkBtn').addEventListener('click', async () => {
     const items = (Array.isArray(data.items) ? data.items : []).filter(x => x && typeof x === 'object');
     if (!items.length) { st.className = 'status err'; st.textContent = T.noItems[L]; return; }
     lastCheck = items.map((x, i) => ({ ...x, question: str(x.question).trim() || qs[i] || '' }));
+    for (let i = lastCheck.length; i < qs.length; i++) lastCheck.push({ question: qs[i], process: 0, missing: true });   // a question with no verdict must still be visible
     renderCheck(lastCheck);
     if (items.length !== qs.length) { st.className = 'status err'; st.textContent = T.countMismatch[L].replace('{a}', items.length).replace('{b}', qs.length); }
     else st.textContent = '';
@@ -830,6 +843,10 @@ function renderCheck(items) {
     let p = parseInt(x.process, 10); if (!(p >= 1 && p <= PROC.length - 1)) p = 0;
     const lu = x.level_up && typeof x.level_up === 'object' ? x.level_up : null;
     let lp = lu ? parseInt(lu.process, 10) : 0; if (!(lp >= 1 && lp <= PROC.length - 1)) lp = 0;
+    if (x.missing) {
+      return '<div class="item p1"><div class="meta"><span class="badge warn">' + esc(T.noVerdict[L]) + '</span></div>' +
+        '<p class="qtext"><span class="qno">' + (i + 1) + '.</span>' + esc(x.question) + '</p></div>';
+    }
     const flag = v => (v === true || v === 'true') ? '<span class="ok">' + esc(T.yes[L]) + '</span>' : '<span class="flag">' + esc(T.no[L]) + '</span>';
     const issues = Array.isArray(x.issues) ? x.issues.map(str).filter(Boolean) : (str(x.issues) ? [str(x.issues)] : []);
     return '<div class="item p' + (p || PROC.length - 1) + '">' +

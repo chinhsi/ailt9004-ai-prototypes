@@ -44,7 +44,10 @@ function getApiKey() {
 function getRubric() {
   const sh = SpreadsheetApp.getActive().getSheetByName('Rubric');
   if (!sh) throw new Error('No sheet named "Rubric". Use AI Grader > 2. Create sample sheets.');
-  return sh.getRange(1, 1, sh.getLastRow(), 1).getValues().map(r => r[0]).filter(String).join('\n');
+  const last = sh.getLastRow();
+  const text = last < 1 ? '' : sh.getRange(1, 1, last, 1).getValues().map(r => r[0]).filter(String).join('\n').trim();
+  if (text.length < 20) throw new Error('The "Rubric" sheet is empty (or almost empty). Put your criteria in column A — one criterion per row — then grade again.');
+  return text;
 }
 
 // ---------- the AI call ----------
@@ -110,9 +113,19 @@ function checkGrades(g, rubric) {
     g.teacher_note = 'Totals did not add up (model said ' + g.total + ', criteria add to ' + sum + '); the sum is shown. ' + String(g.teacher_note || '');
     g.total = sum;
   }
-  const criteria = String(rubric).split('\n').filter(function (l) { return l.trim(); }).length;
-  if (criteria && g.scores.length < criteria) {
-    g.teacher_note = 'Only ' + g.scores.length + ' of ' + criteria + ' rubric lines were scored — check which criterion is missing. ' + String(g.teacher_note || '');
+  // A rubric sheet also holds task lines and band guides, so counting lines proves nothing.
+  // What matters is whether every criterion it scored is really in the rubric, and whether the maximum adds up.
+  const rubricText = String(rubric).toLowerCase();
+  const strangers = g.scores
+    .map(x => String(x.criterion || '').replace(/^\s*(criterion|準則|項目)\s*\d*\s*[—\-:：.]*\s*/i, '').trim())
+    .filter(name => name.length > 2 && rubricText.indexOf(name.toLowerCase().slice(0, 12)) < 0);
+  if (strangers.length) {
+    g.teacher_note = 'Scored something that is not in your rubric: ' + strangers.join('; ') + '. ' + String(g.teacher_note || '');
+  }
+  const rubricTotal = String(rubric).match(/(?:total|總分|满分|滿分)\s*[=:：]?\s*(\d{1,3})/i);
+  const maxSum = g.scores.reduce((a, x) => a + (isFinite(Number(x.max)) ? Number(x.max) : 0), 0);
+  if (rubricTotal && maxSum && Math.abs(Number(rubricTotal[1]) - maxSum) > 0.01) {
+    g.teacher_note = 'Marks available add to ' + maxSum + ', but the rubric says the total is ' + rubricTotal[1] + ' — a criterion may be missing. ' + String(g.teacher_note || '');
   }
   return g;
 }
@@ -124,27 +137,27 @@ function gradeRows(rowNumbers) {
   if (!sh) throw new Error('No sheet named "Essays". Use AI Grader > 2. Create sample sheets.');
   const rubric = getRubric();
   const started = Date.now();
-  let done = 0, skipped = 0;
+  let done = 0, skipped = 0, failed = 0;
   rowNumbers.forEach((r, i) => {
     if (r < 2) return;                                    // skip header
     const essay = String(sh.getRange(r, 2).getValue()).trim();
     if (!essay) return;
-    if (Date.now() - started > 4.5 * 60 * 1000) { skipped++; return; }   // Apps Script stops a script at 6 minutes
+    if (Date.now() - started > 3.5 * 60 * 1000) { skipped++; return; }   // Google kills the script at 6 minutes and one essay can take a minute with retries
     if (i > 0) Utilities.sleep(SECONDS_BETWEEN_CALLS * 1000);
-    sh.getRange(r, 3, 1, 4).clearContent();               // last run's scores must not sit beside this run's result
+    const hadResult = String(sh.getRange(r, 4).getValue()).trim() !== '';
     sh.getRange(r, 7).setValue('grading…'); SpreadsheetApp.flush();
     try {
-      const g = checkGrades(gradeEssay(rubric, essay), rubric);
+      const g = checkGrades(gradeEssay(rubric, essay), rubric);   // nothing is cleared until there is a result to put in its place
       const scoreText = g.scores.map(s => s.criterion + ' ' + s.score + '/' + s.max + ' — ' + s.reason).join('\n');
       sh.getRange(r, 3, 1, 5).setValues([[scoreText, g.total, g.feedback, g.teacher_note, new Date()]]);
       done++;
     } catch (e) {
-      sh.getRange(r, 7).setValue('ERROR: ' + e.message);
+      failed++;
+      sh.getRange(r, 7).setValue('ERROR: ' + e.message + (hadResult ? ' — columns C–F still show an EARLIER run, not this one.' : ''));
     }
     SpreadsheetApp.flush();
   });
-  if (skipped) SpreadsheetApp.getUi().alert(skipped + ' row(s) were not graded: Google stops a script after 6 minutes. Select those rows and grade them in a second batch.');
-  return done;
+  return { done: done, failed: failed, skipped: skipped };
 }
 
 function gradeSelected() {
@@ -160,8 +173,17 @@ function gradeSelected() {
     for (let r = range.getRow(); r < range.getRow() + range.getNumRows(); r++) if (rows.indexOf(r) < 0) rows.push(r);
   });
   rows.sort((a, b) => a - b);
-  const n = gradeRows(rows);
-  SpreadsheetApp.getUi().alert('Graded ' + n + ' essay(s). Now READ them — the AI drafts, you decide.');
+  report(gradeRows(rows));
+}
+
+// One honest sentence about what actually happened.
+function report(r) {
+  const bits = [];
+  if (r.done) bits.push('Graded ' + r.done + ' essay(s). Now READ them — the AI drafts, you decide.');
+  if (r.failed) bits.push(r.failed + ' row(s) FAILED — see the error in column G ("Graded at").');
+  if (r.skipped) bits.push(r.skipped + ' row(s) were not attempted: Google stops a script after 6 minutes. Select those rows and grade them in a second batch.');
+  if (!bits.length) bits.push('Nothing to grade: no rows with essay text were selected.');
+  SpreadsheetApp.getUi().alert(bits.join('\n\n'));
 }
 
 function gradeAll() {
@@ -171,8 +193,7 @@ function gradeAll() {
   for (let r = 2; r <= sh.getLastRow(); r++) {
     if (String(sh.getRange(r, 2).getValue()).trim() && !sh.getRange(r, 4).getValue()) rows.push(r);
   }
-  const n = gradeRows(rows);
-  SpreadsheetApp.getUi().alert('Graded ' + n + ' essay(s). Now READ them — the AI drafts, you decide.');
+  report(gradeRows(rows));
 }
 
 // ---------- sample data ----------
