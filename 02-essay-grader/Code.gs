@@ -56,6 +56,7 @@ function gradeEssay(rubric, essay) {
     'You are an experienced Hong Kong language teacher marking a student essay with a rubric.',
     'Score each rubric criterion strictly and consistently. Justify scores with evidence from the essay.',
     'Write the feedback FOR THE STUDENT in the same language as the essay: 3 short bullet points (one strength, two concrete things to improve, quoting the student\'s own words).',
+    'When you quote the student, use 「」 or single quotes — never a double quote, and never a line break, inside a JSON string. Keep the whole reply on one line.',
     'Write a one-line NOTE FOR THE TEACHER: anything a human must check (off-topic, possible copying/AI-written, under-length, sensitive content), or "None".',
     'Return exactly one score object per criterion in the rubric, in the rubric\'s order. Do not invent criteria, do not merge or skip any.',
     'For each improvement bullet, name one concrete action the student can take on the next draft, not a general wish.',
@@ -77,7 +78,17 @@ function gradeEssay(rubric, essay) {
       });
       const code = resp.getResponseCode();
       let data = {}; try { data = JSON.parse(resp.getContentText()); } catch (e) {}
-      if (code === 200 && data.choices && data.choices[0]) return parseJson(data.choices[0].message.content);
+      if (code === 200 && data.choices && data.choices[0]) {
+        const ch = data.choices[0];
+        const raw = (ch.message && ch.message.content) || ch.text || '';
+        try {
+          return parseJson(raw);
+        } catch (e) {                                              // free models often break their own JSON: retry, then try the next model
+          lastErr = new Error(model + ' returned text that is not valid JSON (' + e.message.slice(0, 60) + ')');
+          Utilities.sleep(1000);
+          continue;
+        }
+      }
       lastErr = new Error(data.error ? (data.error.message || JSON.stringify(data.error)) : 'HTTP ' + code);
       if (code === 402 || code === 403) break;                     // no credit, or model blocked for this region: skip to next model
       if ([429, 502, 503, 404].indexOf(code) < 0) throw lastErr;   // real error: stop
@@ -91,12 +102,46 @@ function gradeEssay(rubric, essay) {
     '. Free model names change often — check them at openrouter.ai/models?q=free and edit MODELS at the top of the script.');
 }
 
-// Lenient JSON extraction: models sometimes wrap JSON in ``` fences or add a sentence.
+// Lenient JSON extraction. Free models wrap JSON in ``` fences, add a sentence, leave a trailing comma,
+// break a line inside a string, or quote the student with a raw " — all of which JSON.parse refuses.
 function parseJson(text) {
-  try { return JSON.parse(text); } catch (e) {}
-  const m = String(text).match(/\{[\s\S]*\}/);
-  if (m) return JSON.parse(m[0]);
-  throw new Error('Model did not return JSON: ' + String(text).slice(0, 80));
+  const raw = String(text);
+  try { return JSON.parse(raw); } catch (e) {}
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('the reply contained no JSON object');
+  const candidates = [m[0], m[0].replace(/,\s*([}\]])/g, '$1'), repairJson(m[0])];
+  for (let i = 0; i < candidates.length; i++) {
+    try { return JSON.parse(candidates[i]); } catch (e) {}
+  }
+  throw new Error('the reply was not valid JSON');
+}
+
+// Walk the text once, tracking whether we are inside a string, and fix what models break there:
+// a raw line break, and a double quote that is clearly content rather than the end of the value.
+function repairJson(str) {
+  let out = '', inStr = false, esc = false;
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charAt(i);
+    if (esc) { out += c; esc = false; continue; }
+    if (c === '\\') { out += c; esc = true; continue; }
+    if (!inStr) {
+      if (c === '"') inStr = true;
+      out += c;
+      continue;
+    }
+    if (c === '\n' || c === '\r') { out += '\\n'; continue; }
+    if (c === '\t') { out += '\\t'; continue; }
+    if (c === '"') {
+      let j = i + 1;
+      while (j < str.length && ' \t\r\n'.indexOf(str.charAt(j)) >= 0) j++;
+      const next = str.charAt(j);
+      if (next === ',' || next === '}' || next === ']' || next === ':') { inStr = false; out += c; }
+      else out += '\\"';                                   // the student's own quotation marks, not the end of the value
+      continue;
+    }
+    out += c;
+  }
+  return out.replace(/,\s*([}\]])/g, '$1');
 }
 
 // The model can miscount: recompute the total, and say so when its own total disagrees.

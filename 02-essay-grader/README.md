@@ -27,6 +27,7 @@
 
 - **Google stops a script after 6 minutes.** With the polite pause between essays that is roughly 10–15 essays per run; the script now tells you how many rows it skipped so you can grade the rest in a second batch.
 - **A free key allows about 50 requests a day**, and one essay can use more than one (each model in the list gets a retry). A class set can finish the day's allowance.
+- **Free models sometimes break their own JSON** (usually by quoting the student with a raw `"`). The script repairs the common cases, and if the reply is still unreadable it retries and then tries the next model in the list; only if all of them fail does the row show an error. If you see `ERROR: … not valid JSON`, just grade that row again.
 - Column A is never sent to the AI; the essay itself is.
 
 ## Ethics checklist (Week 2 applies here!)

@@ -688,7 +688,35 @@ async function callAI(system, user, statusEl) {
 function parseJSON(text) {
   const t = text.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a < 0 || b < 0) return null;
-  try { const o = JSON.parse(t.slice(a, b + 1)); return (o && typeof o === 'object') ? o : null; } catch (e) { return null; }
+  const cut = t.slice(a, b + 1);
+  // Free models break their own JSON in three ways: a trailing comma, a line break inside a string,
+  // and a raw " around a quotation from the passage (common in Chinese items). Repair before giving up.
+  const tries = [cut, cut.replace(/,\s*([}\]])/g, '$1'), repairJSON(cut)];
+  for (const candidate of tries) {
+    try { const o = JSON.parse(candidate); if (o && typeof o === 'object') return o; } catch (e) {}
+  }
+  return null;
+}
+function repairJSON(str) {
+  let out = '', inStr = false, esc = false;
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charAt(i);
+    if (esc) { out += c; esc = false; continue; }
+    if (c === '\\') { out += c; esc = true; continue; }
+    if (!inStr) { if (c === '"') inStr = true; out += c; continue; }
+    if (c === '\n' || c === '\r') { out += '\\n'; continue; }
+    if (c === '\t') { out += '\\t'; continue; }
+    if (c === '"') {
+      let j = i + 1;
+      while (j < str.length && ' \t\r\n'.indexOf(str.charAt(j)) >= 0) j++;
+      const next = str.charAt(j);
+      if (next === ',' || next === '}' || next === ']' || next === ':') { inStr = false; out += c; }
+      else out += '\\"';                                  // a quotation inside the value, not the end of it
+      continue;
+    }
+    out += c;
+  }
+  return out.replace(/,\s*([}\]])/g, '$1');
 }
 
 // ---------- generate ----------
