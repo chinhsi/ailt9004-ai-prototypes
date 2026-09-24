@@ -11,7 +11,7 @@
 
 **Why this design:** this is what an "agent" is in practice — a model + rules + a repeatable multi-step procedure + permission to write files. You can read every rule it follows and change it in a text editor.
 
-> **Students / teachers who just want to run it:** follow [`RUN-IT-YOURSELF.md`](RUN-IT-YOURSELF.md) — download the folder, open a terminal in it, one command. The rest of this README is the design story.
+> **Students / teachers who just want to run it:** download [`lesson-pack-agent.zip`](https://github.com/chinhsi/ailt9004-ai-prototypes/raw/main/03-lesson-pack-agent/lesson-pack-agent.zip) (just this folder, 40 KB) and follow [`RUN-IT-YOURSELF.md`](RUN-IT-YOURSELF.md), which is inside it. The rest of this README is the design story.
 
 ## Try it (5 minutes)
 

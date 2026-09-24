@@ -22,14 +22,16 @@ A version number (for example `1.18.31`) means you are ready. `command not found
 
 ## Step 1 — Download the folder
 
-1. Go to **<https://github.com/chinhsi/ailt9004-ai-prototypes>**
-2. Click the green **Code** button → **Download ZIP**
-3. Unzip it (double-click on Mac; right-click → *Extract All* on Windows)
-4. Inside, find the folder **`03-lesson-pack-agent`** and drag it to somewhere easy to reach, such as your **Desktop**
+**Click this one link:**
+<https://github.com/chinhsi/ailt9004-ai-prototypes/raw/main/03-lesson-pack-agent/lesson-pack-agent.zip>
 
-That folder is the whole "program": some text files and two sample readings. You can open every file in it with a normal text editor.
+It downloads a single 40 KB file, `lesson-pack-agent.zip`. Unzip it (double-click on Mac; right-click → *Extract All* on Windows) and drag the resulting **`lesson-pack-agent`** folder somewhere easy to reach, such as your **Desktop**.
 
-*If you already use git:* `git clone https://github.com/chinhsi/ailt9004-ai-prototypes.git` works too.
+That folder is the whole "program": a few text files and two sample readings. You can open every file in it with a normal text editor.
+
+*Other ways, if you prefer:* the whole prototype collection is at <https://github.com/chinhsi/ailt9004-ai-prototypes> (green **Code** button → *Download ZIP*), or `git clone https://github.com/chinhsi/ailt9004-ai-prototypes.git`.
+
+> The folder contains two hidden items, `.opencode` and `.agents`, which hold the recipe. They are inside the zip — you just will not see them in Finder or File Explorer unless you turn on "show hidden files" (Mac: **Cmd+Shift+.**). You do not need to see them to run the tool, only to edit the recipe in Step 6.
 
 ---
 
