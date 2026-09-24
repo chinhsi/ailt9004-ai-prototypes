@@ -1,6 +1,20 @@
 # Run the Lesson Pack Agent on your own computer
 
-**What you get:** a folder on your laptop where one command turns any reading text into five teaching files — vocabulary, comprehension questions, a cloze, a self-marking quiz, and teacher notes.
+## What you get
+
+One command on one reading text produces a folder with five files you can teach from:
+
+| File | What is in it |
+|---|---|
+| `01-vocabulary.md` | 8–10 target words — part of speech, a definition at your pupils' level, **the sentence where the word appears in the text** — plus 5 practice items and an answer key |
+| `02-comprehension.md` | 8 questions: 4 literal, 3 inferential, 1 personal response, with an answer key |
+| `03-cloze.md` | the text with 10 gaps, a word bank and an answer key |
+| `04-quiz.html` | an 8-question quiz in one file — **double-click it and it runs in a browser and marks itself**, offline |
+| `00-teacher-notes.md` | the level and why, a **40-minute lesson flow as a timed table**, a differentiation tip for weaker and for stronger pupils, and a "check before use" list |
+
+Want to see the real thing first? The folder you download already contains `example-output/` — two finished packs, one English, one Chinese.
+
+**What it will not do:** it has never met your class, it cannot check facts (it once wrote "MTR trains" where the text only said "tunnels and trains"), and the cloze and quiz are the weakest parts. Everything it writes is a draft for you to edit.
 
 **Time:** about 20 minutes the first time (most of it downloading), two minutes every time after that.
 
