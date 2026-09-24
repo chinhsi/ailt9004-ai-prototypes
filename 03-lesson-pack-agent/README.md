@@ -11,6 +11,8 @@
 
 **Why this design:** this is what an "agent" is in practice — a model + rules + a repeatable multi-step procedure + permission to write files. You can read every rule it follows and change it in a text editor.
 
+> **Students / teachers who just want to run it:** follow [`RUN-IT-YOURSELF.md`](RUN-IT-YOURSELF.md) — download the folder, open a terminal in it, one command. The rest of this README is the design story.
+
 ## Try it (5 minutes)
 
 1. Install OpenCode and connect its free Zen models. Course students: *Getting Started with AI Command-Line Tools* on Moodle. Everyone else: install from <https://opencode.ai> (Mac/Linux `curl -fsSL https://opencode.ai/install | bash`; Windows: see their site), then run `opencode auth login` and choose **Zen** — free, no credit card, and reachable from Hong Kong without a VPN.
